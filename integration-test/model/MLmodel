@@ -1,0 +1,10 @@
+artifact_path: model
+flavors:
+  python_function:
+    data: model.pkl
+    env: conda.yaml
+    loader_module: mlflow.sklearn
+    python_version: 3.8.10
+    code: null
+run_id: Test123
+utc_time_created: '2022-06-02 20:18:34.123456'

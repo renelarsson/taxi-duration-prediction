@@ -1,0 +1,9 @@
+name: mlflow-env
+channels:
+  - defaults
+dependencies:
+  - python=3.8.10
+  - scikit-learn=1.0.2
+  - pip
+  - pip:
+      - mlflow
