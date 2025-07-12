@@ -6,11 +6,11 @@ services:
     environment:
       - PREDICTIONS_STREAM_NAME=${PREDICTIONS_STREAM_NAME}
       - RUN_ID=Test123
-      - AWS_DEFAULT_REGION=eu-north-1
+      - AWS_DEFAULT_REGION=${AWS_REGION}
       - MODEL_LOCATION=/app/model
       - KINESIS_ENDPOINT_URL=http://kinesis:4566/
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
       - "./model:/app/model"
   kinesis:
