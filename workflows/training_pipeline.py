@@ -141,7 +141,12 @@ def main_flow(
     """The main training pipeline"""
 
     # MLflow settings
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    import os
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
+    # Set MLflow S3 endpoint if provided
+    s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
+    if s3_endpoint:
+        os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
     mlflow.set_experiment("taxi-duration-experiment")
 
     # Load

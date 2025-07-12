@@ -1,34 +1,54 @@
 #!/bin/bash
 
-PROJECT_NAME="capstone-project"
+# =============================
+# User Settings (Change These!)
+# =============================
+# Set your project name below. This will be the root folder for your project.
+# Example: PROJECT_NAME="my-project-name"
+# New users should change PROJECT_NAME to match their own project/repo name.
+PROJECT_NAME="taxi-duration-prediction" # <-- Change this to your desired project name
+
+# Create the main project directory and move into it
 mkdir $PROJECT_NAME && cd $PROJECT_NAME
 
-# Create directory structure
+# =============================
+# Directory Structure Creation
+# =============================
+# The following commands create the recommended folder structure for the project.
+# You can modify or extend these as needed for your use case.
+
 # Root structure
-mkdir -p .github/workflows
-mkdir -p config
-mkdir -p scripts
-mkdir -p integration-test
+mkdir -p .github/workflows      # CI/CD workflows
+mkdir -p config                # Configuration files (Grafana, etc.)
+mkdir -p scripts               # Deployment and automation scripts
+mkdir -p integration-test      # LocalStack and Docker-based integration testing
 mkdir -p integration-test/model
-mkdir -p tests/unit
-mkdir -p tests/integration
-mkdir -p .vscode
+mkdir -p tests/unit            # Unit tests
+mkdir -p tests/integration     # Integration tests
+mkdir -p .vscode               # VSCode settings
 
 # Infrastructure (hierarchical order)
-mkdir -p infrastructure/vars
+mkdir -p infrastructure/vars   # Terraform variable files
 mkdir -p infrastructure/terraform/modules/kinesis
 mkdir -p infrastructure/terraform/modules/s3  
 mkdir -p infrastructure/terraform/modules/ecr
 mkdir -p infrastructure/terraform/modules/lambda
 
 # Application code (logical order)
-mkdir -p src/data
-mkdir -p src/models
-mkdir -p src/monitoring
-mkdir -p src/deployment
-mkdir -p workflows
+mkdir -p src/data              # Data extraction and preprocessing
+mkdir -p src/models            # Model training and prediction
+mkdir -p src/monitoring        # Model/data drift monitoring
+mkdir -p src/deployment        # Lambda and Kinesis consumer code
+mkdir -p workflows             # Prefect workflow orchestration
 
-# Create files with 'heredoc' and one filename per line (.gitkeep_structure)
+# =============================
+# File Creation
+# =============================
+# The following block creates empty files for your project structure.
+# You should fill these files with your own code, configuration, and documentation.
+# Some files (like .env.example) contain example settings and should be updated with your own secrets and credentials.
+# New users should update secrets, passwords, and sensitive config in .env.example, tfvars, and config files.
+
 cat > .gitkeep_structure << 'EOF'
 README.md
 .gitignore
@@ -36,7 +56,7 @@ README.md
 requirements.txt
 requirements-dev.txt
 .pre-commit-config.yaml
-pyproject.toml                      
+pyproject.toml
 Makefile
 config/grafana_datasources.yaml
 config/grafana_dashboards.yaml
@@ -54,7 +74,7 @@ infrastructure/terraform/modules/lambda/variables.tf
 infrastructure/terraform/modules/lambda/main.tf
 infrastructure/terraform/modules/lambda/iam.tf
 lambda_function.py
-model.py                            
+model.py
 Dockerfile
 src/data/extract.py
 src/data/preprocess.py
@@ -69,7 +89,7 @@ workflows/monitoring_pipeline.py
 tests/__init__.py
 tests/data.b64
 tests/unit/__init__.py
-tests/unit/model_test.py 
+tests/unit/model_test.py
 tests/integration/__init__.py
 tests/integration/test_pipeline_e2e.py
 tests/integration/test_workflow.py
@@ -89,15 +109,18 @@ integration-test/model/python_env.yaml
 integration-test/model/requirements-test.txt
 .github/workflows/ci.yaml
 .github/workflows/cd.yaml
-plan.md                             
-.vscode/settings.json               
+plan.md
+.vscode/settings.json
 EOF
 
-# Create all files
+# Create all files listed above
 xargs touch < .gitkeep_structure
 rm .gitkeep_structure
 
-# Initialize git
+# =============================
+# Git Initialization
+# =============================
+# Initializes a new git repository in your project folder.
 git init
 
 echo "Project structure created successfully!"

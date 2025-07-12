@@ -1,9 +1,16 @@
+
 import pickle
 import mlflow
 import mlflow.sklearn
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_squared_error
+import os
+
+# Set MLflow S3 endpoint if provided
+s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
+if s3_endpoint:
+    os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
 
 def load_model(model_path: str):
     """Load pickled model"""
@@ -92,8 +99,9 @@ def load_mlflow_model(run_id: str):
     Returns:
         Loaded model
     """
+    import os
     # Set tracking URI
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
     
     # Load model
     model_uri = f"runs:/{run_id}/model"

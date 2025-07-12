@@ -73,53 +73,67 @@ taxi-duration-prediction/
 
 ---
 
+
 ## How to Reproduce / Setup
 
+All files required for review are already present in the repository. **Peer reviewers do not need to run the setup script.**
+
+If you do want to use the setup script, make sure it is executable:
+```bash
+chmod +x setup_project.sh
+```
+Then you can run:
+```bash
+./setup_project.sh
+```
+
+To run or reproduce the project:
+
 1. **Clone the repository**
-2. **Run the setup script:**  
-   ```bash
-   ./setup_project.sh
-   ```
-   This will install dependencies, set up your environment, and prepare the repo for development.
-3. **(Optional) Manual dependency installation:**  
+2. **(Optional) Install dependencies:**  
    ```bash
    pip install -r requirements.txt
    pip install -r requirements-dev.txt
    ```
-4. **Set up environment variables:**  
-   Copy `.env.example` to `.env` and fill in your secrets.
-5. **Provision infrastructure:**  
+3. **Set up environment variables:**  
+   Copy `.env.example` to `.env` and fill in your secrets and configuration. Example variables:
+
+   ```env
+   # AWS Configuration
+   AWS_REGION=your-aws-region
+   AWS_ACCESS_KEY_ID=your-aws-access-key-id
+   AWS_SECRET_ACCESS_KEY=your-secret-aws-access-key
+   AWS_ACCOUNT_ID=your-aws-account-id
+
+   # MLflow Configuration
+   MLFLOW_TRACKING_URI=http://localhost:5000
+   MLFLOW_S3_ENDPOINT_URL=https://s3.your-aws-region.amazonaws.com
+
+   # Database Configuration
+   DB_HOST=your-db-host
+   DB_USER=your-db-user
+   DB_PASSWORD=your-db-password
+   DB_NAME=your-db-name
+
+   # Streaming and Model Deployment
+   OUTPUT_STREAM_NAME=your-output-stream-name
+   PREDICTIONS_STREAM_NAME=your-predictions-stream-name
+   MODEL_BUCKET=your-model-bucket
+   INPUT_STREAM_NAME=your-input-stream-name
+   ```
+4. **Provision infrastructure:**  
    Use Terraform scripts in `infrastructure/` to deploy AWS resources.
-6. **Train and register your model:**  
+5. **Train and register your model:**  
    Run workflows in `workflows/` or scripts in `src/`.
-7. **Deploy the model:**  
+6. **Deploy the model:**  
    Use scripts in `scripts/` or CI/CD pipeline.
-8. **Run tests:**  
+7. **Run tests:**  
    ```bash
    pytest
    ```
    for unit/integration tests.
-9. **Monitor:**  
+8. **Monitor:**  
    Use Grafana dashboards and Evidently monitoring.
-
----
-
-## Evaluation Criteria
-
-- **Problem description:** Clearly state the ML problem and solution.
-- **Cloud usage:** Use cloud services or LocalStack for infrastructure.
-- **Experiment tracking & registry:** Track experiments and register models.
-- **Workflow orchestration:** Automate pipelines with Prefect or similar.
-- **Model deployment:** Containerize and deploy your model.
-- **Model monitoring:** Monitor metrics and data drift.
-- **Reproducibility:** Provide clear instructions and specify dependency versions.
-- **Best practices:**  
-  - Unit tests  
-  - Integration tests  
-  - Linter/code formatter  
-  - Makefile  
-  - Pre-commit hooks  
-  - CI/CD pipeline
 
 ---
 

@@ -1,6 +1,7 @@
 import pickle
 import mlflow
 import mlflow.sklearn
+import os
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
@@ -18,8 +19,12 @@ def train_model(X_train, X_val, y_train, y_val, dv): # Random Forest (production
     Returns:
         Tuple of (model, rmse)
     """
-    # Set MLflow tracking
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    # Set MLflow tracking to use environment variable
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
+    # Set MLflow S3 endpoint if provided
+    s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
+    if s3_endpoint:
+        os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
     mlflow.set_experiment("taxi-duration-prediction")
     
     with mlflow.start_run():

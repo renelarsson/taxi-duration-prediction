@@ -46,6 +46,10 @@ def prepare_dictionaries(df: pd.DataFrame):
 def load_model(run_id):
     model_bucket = os.getenv('MODEL_BUCKET', 'mlops-capstone-models')
     logged_model = f's3://{model_bucket}/1/{run_id}/artifacts/model'
+    # Set MLflow S3 endpoint if provided
+    s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
+    if s3_endpoint:
+        os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
     model = mlflow.pyfunc.load_model(logged_model)
     return model
 

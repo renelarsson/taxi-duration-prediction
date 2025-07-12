@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # Configure stream
 KINESIS_ENDPOINT = os.getenv('KINESIS_ENDPOINT_URL', "http://localhost:4566")
-INPUT_STREAM_NAME = os.getenv('INPUT_STREAM_NAME', 'ride_events')
+INPUT_STREAM_NAME = os.getenv('INPUT_STREAM_NAME', 'ride-events')
 OUTPUT_STREAM_NAME = os.getenv('OUTPUT_STREAM_NAME', 'ride_predictions')
 TEST_RUN = os.getenv('TEST_RUN', 'False') == 'True'
 
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Simple Kinesis consumer')
     parser.add_argument('--test-local', action='store_true', help='Test locally without Kinesis')
-    parser.add_argument('--input-stream', default='ride_events', help='Input stream name')
+    parser.add_argument('--input-stream', default='ride-events', help='Input stream name')
     parser.add_argument('--output-stream', default='ride_predictions', help='Output stream name')
     
     args = parser.parse_args()

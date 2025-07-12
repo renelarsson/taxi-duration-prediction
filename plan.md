@@ -36,7 +36,10 @@
 - **Integration Tests:** End-to-end pipeline and workflow tests in `tests/integration/` and `integration-test/`.
 - **E2E Tests:** Automated cloud tests in `scripts/test_cloud_e2e.sh`.
 
-## 8. Project Structure
+## 8. Project Structure & Configuration
+- **Environment Variables:**
+  - All configuration (AWS, MLflow, database, streaming) is managed via environment variables in `.env.example`.
+  - Update `.env.example` with your own secrets and settings before running the project.
 - **Directories:**
   - `src/`: Source code (data, models, deployment, monitoring)
   - `infrastructure/`: Terraform modules and configs
