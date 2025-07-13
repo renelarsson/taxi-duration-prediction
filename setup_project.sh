@@ -18,14 +18,17 @@ mkdir $PROJECT_NAME && cd $PROJECT_NAME
 # You can modify or extend these as needed for your use case.
 
 # Root structure
-mkdir -p .github/workflows      # CI/CD workflows
-mkdir -p config                # Configuration files (Grafana, etc.)
-mkdir -p scripts               # Deployment and automation scripts
-mkdir -p integration-test      # LocalStack and Docker-based integration testing
+mkdir -p model                # Production model artifacts
+mkdir -p data                 # Data storage
+mkdir -p output               # Output artifacts
+mkdir -p .github/workflows    # CI/CD workflows
+mkdir -p config               # Configuration files (Grafana, etc.)
+mkdir -p scripts              # Deployment and automation scripts
+mkdir -p integration-test     # Integration testing
 mkdir -p integration-test/model
-mkdir -p tests/unit            # Unit tests
-mkdir -p tests/integration     # Integration tests
-mkdir -p .vscode               # VSCode settings
+mkdir -p tests/unit           # Unit tests
+mkdir -p tests/integration    # Integration tests
+mkdir -p .vscode              # VSCode settings
 
 # Infrastructure (hierarchical order)
 mkdir -p infrastructure/vars   # Terraform variable files
@@ -52,6 +55,7 @@ mkdir -p workflows             # Prefect workflow orchestration
 cat > .gitkeep_structure << 'EOF'
 README.md
 .gitignore
+.env
 .env.example
 requirements.txt
 requirements-dev.txt
@@ -76,6 +80,15 @@ infrastructure/terraform/modules/lambda/iam.tf
 lambda_function.py
 model.py
 Dockerfile
+docker-compose.yaml
+model/MLmodel
+model/README.txt
+model/conda.yaml
+model/model.pkl
+model/python_env.yaml
+model/requirements-test.txt
+data/.gitkeep
+output/.gitkeep
 src/data/extract.py
 src/data/preprocess.py
 src/models/train.py
@@ -97,7 +110,6 @@ scripts/deploy_manual.sh
 scripts/publish.sh
 scripts/test_cloud_e2e.sh
 integration-test/run.sh
-integration-test/docker-compose.yaml
 integration-test/event.json
 integration-test/test_docker.py
 integration-test/test_kinesis.py

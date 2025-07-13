@@ -1,9 +1,8 @@
-# Capstone Project: End-to-End MLOps Pipeline
+# Taxi Duration Prediction: End-to-End MLOps Pipeline
 
 ## Overview
 
-This repository contains the capstone project for the MLOps Zoomcamp course.  
-The goal is to apply all course modules to build a robust, production-grade machine learning pipeline, covering data ingestion, model training, deployment, monitoring, and automation.
+This repository contains the capstone project for the MLOps Zoomcamp course. It is a production-ready MLOps project for predicting taxi ride durations. It demonstrates modern MLOps best practices: data ingestion, model training, deployment, monitoring, and automation.
 
 **Demo Video:**  
 [Project Walkthrough](https://www.loom.com/share/8f99d25893de4fb8aaa95c0395c740b6)
@@ -12,15 +11,12 @@ The goal is to apply all course modules to build a robust, production-grade mach
 
 ## Problem Statement
 
-This project demonstrates how to build, deploy, and monitor an ML model using modern MLOps best practices.  
-You will:
-
-- Select a dataset (see [Datasets](#datasets))
-- Train and track a model using experiment tracking tools
-- Build a reproducible training pipeline
-- Deploy the model (batch, web service, or streaming)
-- Monitor model performance and data drift
-- Automate everything with CI/CD and Infrastructure as Code
+Build, deploy, and monitor an ML model using:
+- Experiment tracking (MLflow)
+- Reproducible training pipelines
+- Automated deployment (AWS Lambda, S3, Kinesis, ECR)
+- Monitoring (Evidently, Grafana)
+- CI/CD and Infrastructure as Code (Terraform, GitHub Actions)
 
 ---
 
@@ -44,9 +40,13 @@ taxi-duration-prediction/
 ├── scripts/                   # Deployment and cloud testing automation
 ├── integration-test/          # LocalStack and Docker-based integration testing
 │   └── model/                 # MLflow model artifacts and environment files
+├── model/                     # Production model artifacts (model.pkl, etc.)
+├── data/                      # Data storage
+├── output/                    # Output artifacts
 ├── lambda_function.py         # Lambda entry point
 ├── model.py                   # Core ML logic
 ├── Dockerfile                 # Container image definition
+├── docker-compose.yaml        # Service orchestration
 ├── requirements.txt           # Production dependencies
 ├── requirements-dev.txt       # Development dependencies
 ├── Makefile                   # Automation commands
@@ -90,43 +90,28 @@ Then you can run:
 To run or reproduce the project:
 
 1. **Clone the repository**
-2. **(Optional) Install dependencies:**  
+2. **Run the setup script** (optional for reviewers):
+   ```bash
+   chmod +x setup_project.sh
+   ./setup_project.sh
+   ```
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    pip install -r requirements-dev.txt
    ```
-3. **Set up environment variables:**  
-   Copy `.env.example` to `.env` and fill in your secrets and configuration. Example variables:
-
-   ```env
-   # AWS Configuration
-   AWS_REGION=your-aws-region
-   AWS_ACCESS_KEY_ID=your-aws-access-key-id
-   AWS_SECRET_ACCESS_KEY=your-secret-aws-access-key
-   AWS_ACCOUNT_ID=your-aws-account-id
-
-   # MLflow Configuration
-   MLFLOW_TRACKING_URI=http://localhost:5000
-   MLFLOW_S3_ENDPOINT_URL=https://s3.your-aws-region.amazonaws.com
-
-   # Database Configuration
-   DB_HOST=your-db-host
-   DB_USER=your-db-user
-   DB_PASSWORD=your-db-password
-   DB_NAME=your-db-name
-
-   # Streaming and Model Deployment
-   OUTPUT_STREAM_NAME=your-output-stream-name
-   PREDICTIONS_STREAM_NAME=your-predictions-stream-name
-   MODEL_BUCKET=your-model-bucket
-   INPUT_STREAM_NAME=your-input-stream-name
+4. **Set up environment variables:**
+   - Copy `.env.example` to `.env` and fill in your secrets and configuration.
+5. **Start services:**
+   ```bash
+   docker-compose up
    ```
-4. **Provision infrastructure:**  
-   Use Terraform scripts in `infrastructure/` to deploy AWS resources.
-5. **Train and register your model:**  
-   Run workflows in `workflows/` or scripts in `src/`.
-6. **Deploy the model:**  
-   Use scripts in `scripts/` or CI/CD pipeline.
+6. **Provision infrastructure:**
+   - Use Terraform scripts in `infrastructure/` to deploy AWS resources.
+7. **Train and register your model:**
+   - Run workflows in `workflows/` or scripts in `src/`.
+8. **Deploy the model:**
+   - Use scripts in `scripts/` or CI/CD pipeline.
 7. **Run tests:**  
    ```bash
    pytest

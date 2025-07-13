@@ -1,3 +1,4 @@
+# integration-test/run.sh
 #!/usr/bin/env bash
 
 if [[ -z "${GITHUB_ACTIONS}" ]]; then
