@@ -175,7 +175,7 @@ def test_lambda_kinesis_workflow():
             return [21.3] * len(X)
     
     # Test Lambda → Kinesis workflow
-    model_service = ModelService(MockModel(), version='Test123')
+    model_service = ModelService(MockModel(), model_version='Test123')
     
     # Load test event
     event_path = PROJECT_ROOT / "integration-test" / "event.json"

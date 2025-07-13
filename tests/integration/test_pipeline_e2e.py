@@ -105,7 +105,7 @@ def test_model_service_integration():
             return [21.3] * len(X)
     
     # Test model service integration
-    model_service = ModelService(MockModel(), version='Test123')
+    model_service = ModelService(MockModel(), model_version='Test123')
     
     # Test data (from course event.json)
     ride_data = {
