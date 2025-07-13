@@ -17,9 +17,6 @@ myenv/
 # R: changed
 mlruns/
 mlflow.db
-data/
-models/
-output/
 
 # AWS credentials and secrets
 .aws/
