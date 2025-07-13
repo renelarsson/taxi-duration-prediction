@@ -1,0 +1,33 @@
+# .gitignore
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+
+.terraform
+*.tfstate
+*.tfstate.*
+
+myenv/
+.env
+
+.vscode
+.DS_Store
+
+# R: changed
+mlruns/
+mlflow.db
+data/
+models/
+output/
+
+# AWS credentials and secrets
+.aws/
+aws-credentials.json
+*.pem
+*.key
+
+# Other credential files
+credentials.json
+secrets.yaml
+.secrets

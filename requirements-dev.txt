@@ -1,0 +1,22 @@
+# requirements-dev.txt
+# Include production requirements
+-r requirements.txt
+
+# Development and exploration (from Module 2.2, 5.2)
+jupyter
+seaborn
+matplotlib
+
+# Model optimization (from Module 2.2)
+hyperopt
+xgboost
+
+# Code quality (conventional additions)
+pytest
+black==22.6.0
+isort==5.10.1
+pylint
+pre-commit
+
+# Optional: Mage for batch processing (from Module 4.6)
+# mage-ai  # Uncomment if using Mage

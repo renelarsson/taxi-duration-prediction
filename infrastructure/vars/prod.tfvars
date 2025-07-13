@@ -1,0 +1,7 @@
+source_stream_name = "prod_taxi_trip_events"
+output_stream_name = "prod_taxi_predictions"
+model_bucket = "prod-mlops-capstone-models"
+lambda_function_local_path = "../lambda_function.py"
+docker_image_local_path = "../Dockerfile"
+ecr_repo_name = "prod_taxi_duration_predictor"
+lambda_function_name = "prod_taxi_duration_prediction"
