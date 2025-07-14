@@ -34,7 +34,7 @@ variable "shard_count" {
 
 variable "model_bucket" {
   description = "s3_bucket for storing ML models"
-  default = "mlops-capstone-models"
+  default = "mlflow-models-rll"
 }
 
 variable "lambda_function_local_path" { # Lambda paths points to project structure

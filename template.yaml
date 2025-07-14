@@ -7,3 +7,6 @@ Resources:
       PackageType: Image
       ImageUri: stream-model-duration:latest
       Timeout: 10
+      Environment:
+        Variables:
+          MODEL_BUCKET: mlflow-models-rll

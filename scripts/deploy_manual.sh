@@ -17,7 +17,7 @@ export PREDICTIONS_STREAM_NAME="${ENVIRONMENT}_ride_predictions_${PROJECT_NAME}"
 export LAMBDA_FUNCTION="${ENVIRONMENT}_prediction_lambda_${PROJECT_NAME}"
 
 # Model artifacts bucket from training (MLflow experiments)
-export MODEL_BUCKET_DEV=${MODEL_BUCKET_DEV:-"mlops-capstone-models"}
+export MODEL_BUCKET_DEV=${MODEL_BUCKET_DEV:-"mlflow-models-rll"}
 
 echo "Starting manual deployment for ${ENVIRONMENT} environment"
 echo "Region: ${AWS_REGION}"

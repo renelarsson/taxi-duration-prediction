@@ -1,6 +1,6 @@
 source_stream_name = "stg_taxi_trip_events"
 output_stream_name = "stg_taxi_predictions"
-model_bucket = "stg-mlops-capstone-models"
+model_bucket = "mlflow-models-rll"
 lambda_function_local_path = "../lambda_function.py"
 docker_image_local_path = "../Dockerfile"
 ecr_repo_name = "stg_taxi_duration_predictor"

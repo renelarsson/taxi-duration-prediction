@@ -1,0 +1,7 @@
+{
+    "RideDurationPredictionFunction": {
+        "MODEL_BUCKET": "mlflow-models-rll",
+        "RUN_ID": "d126a67b3b1045dca652326abac77fa1",
+        "PREDICTIONS_STREAM_NAME": "ride-predictions"
+    }
+}

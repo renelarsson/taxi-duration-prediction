@@ -27,7 +27,7 @@ class LambdaHandler:
         self.predictions_stream_name = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions')
         self.run_id = os.getenv('RUN_ID')
         self.test_run = os.getenv('TEST_RUN', 'False') == 'True'
-        self.model_bucket = os.getenv('MODEL_BUCKET', 'mlops-capstone-models')
+        self.model_bucket = os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
         
         # Initialize AWS clients
         self.kinesis_client = boto3.client('kinesis') 

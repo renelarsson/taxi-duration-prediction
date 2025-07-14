@@ -5,6 +5,8 @@ PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions
 RUN_ID = os.getenv('RUN_ID')
 TEST_RUN = os.getenv('TEST_RUN', 'False') == 'True'
 
+print("DEBUG RUN_ID:", RUN_ID)  # Line for debugging
+
 model_service = model.init(
     prediction_stream_name=PREDICTIONS_STREAM_NAME,
     run_id=RUN_ID,
