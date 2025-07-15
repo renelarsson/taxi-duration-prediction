@@ -87,6 +87,23 @@ Then you can run:
 ./setup_project.sh
 ```
 
+## AWS SAM Template Configuration
+
+Before deploying, edit `template.yaml` to set the following values for your project:
+
+- `ImageUri`: Set to your own Docker image URI.
+- `MODEL_BUCKET`: Set to your own S3 bucket for MLflow model artifacts.
+
+Example:
+```yaml
+ImageUri: your-image:latest
+Environment:
+  Variables:
+    MODEL_BUCKET: your-mlflow-bucket
+```
+
+Alternatively, you can parameterize these values in `template.yaml` for easier customization (see AWS SAM documentation).
+
 To run or reproduce the project:
 
 1. **Clone the repository**

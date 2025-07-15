@@ -1,4 +1,6 @@
 # requirements-dev.txt
+# Development dependencies for taxi duration prediction
+
 # Include production requirements
 -r requirements.txt
 
@@ -11,12 +13,16 @@ matplotlib
 hyperopt
 xgboost
 
-# Code quality (conventional additions)
+# Code quality
 pytest
 black==22.6.0
 isort==5.10.1
 pylint
 pre-commit
 
+# Integration test dependencies
+deepdiff
+boto3
+
 # Optional: Mage for batch processing (from Module 4.6)
-# mage-ai  # Uncomment if using Mage
+# mage-ai  # Uncomment if

@@ -1,3 +1,7 @@
+# Makefile for MLOps Capstone Project
+# This Makefile defines targets for setting up the environment, running tests,
+# performing code quality checks, building a Docker image, running integration tests,
+# publishing the image, and cleaning up the project directory.
 # Variables
 LOCAL_TAG:=$(shell date +"%Y-%m-%d-%H-%M")
 LOCAL_IMAGE_NAME:=mlops-capstone:${LOCAL_TAG}

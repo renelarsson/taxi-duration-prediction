@@ -1,3 +1,8 @@
+# taxi-duration-prediction/integration-test/test_docker.py
+# This script tests the Docker setup for the taxi duration prediction model.
+# It sends a test event to the Kinesis stream and checks the response from the Lambda function
+# to ensure the prediction is as expected.
+
 # pylint: disable=duplicate-code
 import json
 import requests

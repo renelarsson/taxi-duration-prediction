@@ -1,5 +1,5 @@
 #!/bin/bash
-# Manual deployment script for taxi duration prediction (app. 60 files for complete MLOps system)
+# Manual deployment script for taxi duration prediction (app. 70 files for complete MLOps system)
 # Based on MLOps Zoomcamp Module 6 deployment patterns
 
 # Exit immediately if any command exits with a non-zero status

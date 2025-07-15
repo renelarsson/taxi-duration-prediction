@@ -1,4 +1,5 @@
 # taxi-duration-prediction/src/data/preprocess.py
+# Preprocess taxi trip data for model training and inference
 import pandas as pd
 import pickle
 from sklearn.feature_extraction import DictVectorizer

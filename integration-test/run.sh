@@ -1,4 +1,8 @@
 # integration-test/run.sh
+# This script sets up the local environment for testing the taxi duration prediction model.
+# It builds the Docker image, starts the necessary services, and runs integration tests.
+# Ensure you have Docker and AWS CLI installed and configured for local testing.
+
 #!/usr/bin/env bash
 
 if [[ -z "${GITHUB_ACTIONS}" ]]; then

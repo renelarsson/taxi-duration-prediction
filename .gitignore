@@ -1,20 +1,33 @@
 # .gitignore
+
+# Python bytecode cache (should be in .gitignore)
 __pycache__/
+*.pyc
+
+# Pytest and coverage
 .pytest_cache/
 .coverage
 htmlcov/
 
+# Terraform state and cache
 .terraform
 *.tfstate
 *.tfstate.*
 
+# Virtual environments
 myenv/
+venv/
 .env
 
+# Environment files with secrets and user config
+.env.local-me
+.env.aws-me
+
+# IDE and OS files
 .vscode
 .DS_Store
 
-# R: changed
+# MLflow artifacts and database
 mlruns/
 mlflow.db
 
@@ -28,3 +41,12 @@ aws-credentials.json
 credentials.json
 secrets.yaml
 .secrets
+
+# Data and output artifacts
+data/
+output/
+
+# Plan and temporary files
+plan.md
+*.log
+*.tmp

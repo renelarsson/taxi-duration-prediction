@@ -1,4 +1,5 @@
 # taxi-duration-prediction/src/data/extract.py
+# Load and read NYC taxi trip data
 import pandas as pd
 import requests
 from pathlib import Path

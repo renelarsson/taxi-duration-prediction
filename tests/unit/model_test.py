@@ -1,3 +1,7 @@
+# tests/unit/model_test.py
+"""Unit tests for taxi duration prediction project.
+Based on MLOps Zoomcamp Module 6 patterns.
+"""
 from pathlib import Path
 import model
 

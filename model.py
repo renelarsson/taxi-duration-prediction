@@ -1,4 +1,4 @@
-#model.py
+# taxi-duration-prediction/model.py
 import os
 import json
 import base64

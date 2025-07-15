@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Docker image publishing script for taxi duration prediction
-# Based on MLOps Zoomcamp Module 6 publish patterns (app. 60 files for complete MLOps system)
+# Based on MLOps Zoomcamp Module 6 publish patterns (app. 70 files for complete MLOps system)
 
 # Exit immediately if any command exits with a non-zero status
 set -e

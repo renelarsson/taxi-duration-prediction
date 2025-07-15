@@ -1,3 +1,6 @@
+# taxi-duration-prediction/template.yaml
+# This file is used to define the AWS SAM template for the taxi duration prediction application.
+# It specifies the resources needed for the application, such as Lambda functions and their configurations.
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Resources:

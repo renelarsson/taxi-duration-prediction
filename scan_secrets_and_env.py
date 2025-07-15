@@ -1,3 +1,9 @@
+# scan_secrets_and_env.py
+"""Scan for hardcoded secrets and environment variable usage in project files.
+This script checks for hardcoded secrets and unused environment variables
+defined in a .env.example type file.
+It also identifies hardcoded values that could be replaced with environment variables.
+"""
 import os
 import re
 

@@ -1,3 +1,6 @@
+# Dockerfile for AWS Lambda Python 3.9
+# This Dockerfile sets up a Lambda function environment with Python 3.9
+# and installs the necessary dependencies from requirements.txt.
 FROM public.ecr.aws/lambda/python:3.9
 
 RUN pip install -U pip

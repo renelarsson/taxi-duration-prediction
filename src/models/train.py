@@ -1,4 +1,5 @@
 # src/models/train.py
+# Train and save machine learning models for taxi duration prediction
 import pickle
 import mlflow
 import mlflow.sklearn

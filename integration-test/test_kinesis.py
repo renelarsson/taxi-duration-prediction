@@ -1,3 +1,8 @@
+# taxi-duration-prediction/integration-test/test_kinesis.py
+# This script tests the Kinesis integration for the taxi duration prediction model.
+# It checks if the model correctly processes a Kinesis record and sends the prediction to the output stream.
+# Ensure you have the necessary AWS credentials and Kinesis streams set up for testing.
+
 # pylint: disable=duplicate-code
 import os
 import json
