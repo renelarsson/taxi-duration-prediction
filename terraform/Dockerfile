@@ -5,9 +5,10 @@ FROM public.ecr.aws/lambda/python:3.9
 
 RUN pip install -U pip
 
-COPY taxi_duration_prediction/requirements.txt ./
+COPY ../requirements.txt ./
 RUN pip install -r requirements.txt
 
-COPY [ "taxi_duration_prediction/lambda_function.py", "taxi_duration_prediction/model.py", "./" ]
+COPY lambda_function.py ./
+COPY ../model.py ./
 
 CMD [ "lambda_function.lambda_handler" ]

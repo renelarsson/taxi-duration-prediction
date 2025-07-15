@@ -1,4 +1,4 @@
-# taxi-duration-prediction/src/lambda_function.py
+# terraform/lambda_function.py
 import os
 import model
 
