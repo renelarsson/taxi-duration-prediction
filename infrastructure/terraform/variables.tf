@@ -39,12 +39,12 @@ variable "model_bucket" {
 
 variable "lambda_function_local_path" { # Lambda paths points to project structure
   description = "Local path to lambda function code"
-  default = "../lambda_function.py"
+  default = "../taxi_duration_prediction/lambda_function.py"
 }
 
 variable "docker_image_local_path" {
   description = "Local path to Dockerfile"
-  default = "../Dockerfile"
+  default = "../taxi_duration_prediction/Dockerfile"
 }
 
 variable "ecr_repo_name" {
