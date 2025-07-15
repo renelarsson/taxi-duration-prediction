@@ -29,5 +29,8 @@ variable "shard_level_metrics" {
 
 variable "tags" {
   description = "Tags for kinesis stream"
-    default = "mlops-capstone"
+  type        = map(string)
+  default     = {
+    CreatedBy = "mlops-capstone"
+  }
 }

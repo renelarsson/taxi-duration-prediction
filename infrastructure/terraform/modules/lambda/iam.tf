@@ -144,11 +144,14 @@ policy = <<EOF
         },
         {
             "Effect": "Allow",
-            "Action": "s3:*",
-            "Resource": [
-                "arn:aws:s3:::${var.model_bucket}",
-                "arn:aws:s3:::${var.model_bucket}/*"
-            ]
+          "Action": [
+              "s3:GetObject",
+              "s3:ListBucket"
+          ],
+          "Resource": [
+              "arn:aws:s3:::${var.model_bucket}",
+              "arn:aws:s3:::${var.model_bucket}/*"
+          ]
         },
         {
           "Action": [
