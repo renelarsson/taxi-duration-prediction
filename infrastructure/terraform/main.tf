@@ -23,19 +23,21 @@ locals {
 # Kinesis taxi_trip_events - input stream for taxi data
 module "source_kinesis_stream" {
   source = "./modules/kinesis"
-  retention_period = var.retention_period  
+  stream_name = var.source_stream_name
   shard_count = var.shard_count
-  stream_name = "${var.source_stream_name}-${var.project_id}"
-  tags = var.project_id
+  retention_period = var.retention_period
+  shard_level_metrics = var.shard_level_metrics
+  tags = { CreatedBy = var.project_id }  # <-- FIXED: pass a map, not a string
 }
 
 # Kinesis taxi_predictions - output stream for prediction results
 module "output_kinesis_stream" {
   source = "./modules/kinesis"
-  retention_period = var.retention_period  
+  stream_name = var.output_stream_name
   shard_count = var.shard_count
-  stream_name = "${var.output_stream_name}-${var.project_id}"
-  tags = var.project_id
+  retention_period = var.retention_period
+  shard_level_metrics = var.shard_level_metrics
+  tags = { CreatedBy = var.project_id }  # <-- FIXED: pass a map, not a string
 }
 
 # s3 model bucket for storing ML models
