@@ -56,3 +56,17 @@ variable "lambda_function_name" {
   description = "Lambda function name for streaming predictions"
   default = "taxi-duration-prediction"
 }
+
+variable "shard_level_metrics" {
+  description = "List of Kinesis shard level metrics to enable"
+  type        = list(string)
+  default     = [
+    "IncomingBytes",
+    "OutgoingBytes",
+    "OutgoingRecords",
+    "ReadProvisionedThroughputExceeded",
+    "WriteProvisionedThroughputExceeded",
+    "IncomingRecords",
+    "IteratorAgeMilliseconds"
+  ]
+}
