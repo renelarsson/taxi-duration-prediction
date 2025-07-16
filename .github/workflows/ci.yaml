@@ -56,7 +56,7 @@ tf-plan:
         aws-region: eu-north-1
     - uses: hashicorp/setup-terraform@v2
     - name: TF plan
-      working-directory: 'terraform'
+      working-directory: '.'
       run: |
         terraform init -backend-config="key=mlops-capstone-prod.tfstate" --reconfigure
         terraform plan --var-file vars/prod.tfvars
