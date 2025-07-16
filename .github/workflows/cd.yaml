@@ -60,8 +60,16 @@ jobs:
           MODEL_BUCKET_DEV: "mlflow-models-rll"
           MODEL_BUCKET_PROD: ${{ steps.tf-apply.outputs.model_bucket }}
         run: |
-          export RUN_ID=$(aws s3api list-objects-v2 --bucket ${MODEL_BUCKET_DEV} \
-          --query 'sort_by(Contents, &LastModified)[-1].Key' --output=text | cut -f2 -d/)
+          export LATEST_KEY=$(aws s3api list-objects-v2 --bucket ${MODEL_BUCKET_DEV} \
+            --prefix "1/" \
+            --query 'sort_by(Contents, &LastModified)[-1].Key' --output=text)
+          echo "Latest model key: $LATEST_KEY"
+          export RUN_ID=$(echo "$LATEST_KEY" | cut -f2 -d/)
+          echo "Extracted RUN_ID: $RUN_ID"
+          if [ -z "$RUN_ID" ]; then
+            echo "No RUN_ID found! Check that your S3 bucket has model artifacts under 1/<run_id>/"
+            exit 1
+          fi
           aws s3 sync s3://${MODEL_BUCKET_DEV} s3://${MODEL_BUCKET_PROD}
           echo "::set-output name=run_id::${RUN_ID}"
 
