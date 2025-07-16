@@ -18,14 +18,13 @@ resource null_resource ecr_image {
      docker_file = md5(file(var.docker_image_local_path))
    }
 
-   provisioner "local-exec" {
-     command = <<EOF
-             aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${var.account_id}.dkr.ecr.${var.region}.amazonaws.com
-             cd ../
-             docker build -t ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag} .
-             docker push ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag}
-         EOF
-   }
+  provisioner "local-exec" {
+    command = <<EOF
+      aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${var.account_id}.dkr.ecr.${var.region}.amazonaws.com
+      docker build -f terraform/Dockerfile -t ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag} .
+      docker push ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag}
+    EOF
+  }
 }
 
 // Wait for the image to be uploaded, before lambda config runs
