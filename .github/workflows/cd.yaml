@@ -57,7 +57,7 @@ jobs:
 
       - name: Get model artifacts
         env:
-          MODEL_BUCKET_DEV: "mlflow-models-yourname"
+          MODEL_BUCKET_DEV: "mlflow-models-rll"
           MODEL_BUCKET_PROD: ${{ steps.tf-apply.outputs.model_bucket }}
         run: |
           export RUN_ID=$(aws s3api list-objects-v2 --bucket ${MODEL_BUCKET_DEV} \
