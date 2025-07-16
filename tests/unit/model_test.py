@@ -3,7 +3,7 @@
 Based on MLOps Zoomcamp Module 6 patterns.
 """
 from pathlib import Path
-import model
+import terraform.model as model
 
 def read_text(file):
     test_directory = Path(__file__).parent.parent

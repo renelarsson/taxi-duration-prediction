@@ -1,6 +1,6 @@
 # terraform/lambda_function.py
 import os
-import model
+import terraform.model as model
 
 PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions')
 RUN_ID = os.getenv('RUN_ID')

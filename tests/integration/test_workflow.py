@@ -167,7 +167,7 @@ def test_lambda_kinesis_workflow():
     Test Lambda → Kinesis workflow integration.
     Validates event processing and stream output workflow.
     """
-    from model import ModelService
+    from terraform.model import ModelService
     
     # Mock model for workflow testing
     class MockModel:

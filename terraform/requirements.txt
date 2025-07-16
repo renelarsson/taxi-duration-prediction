@@ -33,3 +33,7 @@ requests
 joblib
 # psycopg # Removed
 psycopg2-binary # Changed from psycopg_binary
+
+# Development and testing (not used in production image)
+pytest
+deepdiff

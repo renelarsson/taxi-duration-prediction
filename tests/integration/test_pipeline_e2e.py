@@ -96,7 +96,7 @@ def test_model_service_integration():
     Test model service integration without external dependencies.
     Tests the core model logic with realistic data.
     """
-    from model import ModelService
+    from terraform.model import ModelService
     
     # Mock model for integration testing (course pattern)
     class MockModel:
