@@ -1,17 +1,30 @@
-# Makefile for MLOps Capstone Project
+# Makefile for Taxi Duration Prediction MLOps Project
 # This Makefile defines targets for setting up the environment, running tests,
 # performing code quality checks, building a Docker image, running integration tests,
 # publishing the image, and cleaning up the project directory.
-# Variables
-LOCAL_TAG:=$(shell date +"%Y-%m-%d-%H-%M")
-LOCAL_IMAGE_NAME:=mlops-capstone:${LOCAL_TAG}
+# Environment separation: Uses .env.dev for development, .env.prod for production.
+# All bucket, stream, and credential values are loaded from environment variables for flexibility.
+# Switch environments by copying .env.dev or .env.prod to .env before running targets 
 
-# Setup environment
+LOCAL_TAG := $(shell date +"%Y-%m-%d-%H-%M")
+LOCAL_IMAGE_NAME := mlops-capstone:$(LOCAL_TAG)
+
+# Setup environment (installs dev dependencies and pre-commit hooks)
 setup:
-    pip install -r requirements-dev.txt # pip instead of pipenv given requirements.txt-based setup 
+    pip install -r requirements-dev.txt
     pre-commit install
 
-# Run tests
+# Switch to development environment
+env-dev:
+    cp .env.dev .env
+    @echo "Switched to development environment (.env.dev)"
+
+# Switch to production environment
+env-prod:
+    cp .env.prod .env
+    @echo "Switched to production environment (.env.prod)"
+
+# Run tests (uses current .env for environment separation)
 test:
     pytest tests/
 
@@ -21,22 +34,24 @@ quality_checks:
     black .
     pylint --recursive=y .
 
-# Build Docker image
-build: quality_checks test
-    docker build -t ${LOCAL_IMAGE_NAME} .
+# Build Docker image with environment separation
+build-image:
+    docker build --build-arg MODEL_BUCKET=$$(grep MODEL_BUCKET .env | cut -d '=' -f2) \
+        -t $(LOCAL_IMAGE_NAME) .
 
-# Integration tests (depends on build)
-integration_test: build
-    LOCAL_IMAGE_NAME=${LOCAL_IMAGE_NAME} bash integration-test/run.sh
+# Run integration tests (uses current .env for environment separation)
+integration-test:
+    pytest tests/integration/
 
-# Publish image (depends on build and integration_test)
-publish: build integration_test
-    LOCAL_IMAGE_NAME=${LOCAL_IMAGE_NAME} bash scripts/publish.sh
+# Publish Docker image (example target, update as needed)
+publish-image:
+    docker tag $(LOCAL_IMAGE_NAME) your-ecr-repo/$(LOCAL_IMAGE_NAME)
+    docker push your-ecr-repo/$(LOCAL_IMAGE_NAME)
 
-# Clean up
+# Clean up project directory
 clean:
-    find . -type f -name "*.pyc" -delete #  Finds all .pyc files (compiled Python)
-    find . -type d -name "__pycache__" -delete # Finds all __pycache__ directories
+    find . -type d -name "__pycache__" -exec rm -rf {} +
+    find . -type f -name "*.pyc" -delete
+    rm -rf output/*
 
-# Provide 'phony targets' to Make (command names, not files)
-.PHONY: setup test quality_checks build integration_test publish clean
+.PHONY: setup env-dev env-prod test quality_checks build-image integration-test publish-image clean

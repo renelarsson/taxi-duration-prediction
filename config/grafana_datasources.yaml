@@ -1,31 +1,28 @@
 # config/grafana_datasources.yaml
 # This file is used to configure Grafana data sources for Evidently Dashboards.
+# Environment separation: Uses .env.dev for development, .env.prod for production.
+# All database, bucket, and endpoint values should be loaded from environment variables for flexibility.
+# For Docker Compose, these values should match the environment variables in your .env.dev/.env.prod files.
 
-# Specifies the version used in this configuration file
 apiVersion: 1
 
-# Defines the data sources that Grafana should connect to
 datasources:
-  # Defines a data source
-  - 
-    # Specifies the name of the data source
-    name: PostgreSQL
-    # Specifies the type of the data source
+  - name: PostgreSQL
     type: postgres
-    # Specifies how Grafana should access the data source
-    # The 'proxy' mode means that all requests are proxied via the Grafana backend/server
-    access: proxy # The backend forwards (proxies) requests to the appropriate services
-    # Specifies the URL (including the port number) of the data source
-    url: db:5432 # Should be equal to docker-compose specification (same for pw etc.)
-    # Specifies the name of the database that Grafana should connect to
-    database: test
-    # Specifies the username that Grafana should use to connect to the database
-    user: postgres
-    # Specifies secure data like passwords
+    access: proxy
+    url: ${DB_HOST}:${DB_PORT} # Loaded from environment (.env.dev/.env.prod)
+    database: ${DB_NAME}       # Loaded from environment (.env.dev/.env.prod)
+    user: ${DB_USER}           # Loaded from environment (.env.dev/.env.prod)
     secureJsonData:
-      # Sets the password for the database connection
-      password: 'example'
-    # Specifies additional JSON data for the data source configuration
+      password: ${DB_PASSWORD} # Loaded from environment (.env.dev/.env.prod)
     jsonData:
-      # Disables SSL mode for the database connection
       sslmode: 'disable'
+
+# Example .env.dev/.env.prod entries:
+# DB_HOST=db
+# DB_PORT=5432
+# DB_NAME=test
+# DB_USER=postgres
+# DB_PASSWORD=example
+
+# For S3 or other buckets, add additional data sources here and use environment variables for bucket names and endpoints.

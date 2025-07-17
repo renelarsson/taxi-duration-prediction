@@ -1,8 +1,26 @@
-# taxi-duration-prediction/template.yaml
-# This file is used to define the AWS SAM template for the taxi duration prediction application.
-# It specifies the resources needed for the application, such as Lambda functions and their configurations.
+# template.yaml - AWS SAM template for taxi duration prediction application
+# Environment separation:
+#   - For development, use .env.dev (MODEL_BUCKET: mlflow-models-rll)
+#   - For production, use .env.prod (MODEL_BUCKET: mlflow-models-rll-mlops-capstone)
+# MODEL_BUCKET and related values are set via Parameters and environment variables for flexibility.
+
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  ModelBucket:
+    Type: String
+    Default: mlflow-models-rll
+    Description: S3 bucket for ML models (use mlflow-models-rll for dev, mlflow-models-rll-mlops-capstone for prod)
+  RunId:
+    Type: String
+    Default: your-run-id
+    Description: MLflow run ID (set via .env.dev or .env.prod)
+  PredictionsStreamName:
+    Type: String
+    Default: stg_taxi_predictions
+    Description: Kinesis stream for predictions (stg_taxi_predictions for dev, prod_taxi_predictions for prod)
+
 Resources:
   RideDurationPredictionFunction:
     Type: AWS::Serverless::Function
@@ -12,4 +30,9 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          MODEL_BUCKET: mlflow-models-rll
+          # MODEL_BUCKET is set from the ModelBucket parameter above.
+          # This allows you to switch between dev and prod buckets at deploy time
+          # by passing a different value for ModelBucket (e.g., via --parameter-overrides).
+          MODEL_BUCKET: !Ref ModelBucket
+          RUN_ID: !Ref RunId
+          PREDICTIONS_STREAM_NAME: !Ref PredictionsStreamName

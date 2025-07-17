@@ -1,10 +1,11 @@
-
 # Make sure to create state bucket beforehand
 terraform {
   required_version = ">= 1.0"
   backend "s3" {
-    bucket  = "mlflow-models-rll"
-    key = "mlops-capstone-stg.tfstate"
+    # For dev, use: mlflow-models-rll -> .env.local-me, stg.tfvars, deploy_manual.sh
+    # For prod, use: mlflow-models-rll-mlops-capstone -> template.yaml (prod stack), GitHub Actions deploy steps
+    bucket  = var.model_bucket
+    key     = "mlops-capstone-${var.project_id}.tfstate"
     region  = "eu-north-1"
     encrypt = true
   }
@@ -27,7 +28,7 @@ module "source_kinesis_stream" {
   shard_count = var.shard_count
   retention_period = var.retention_period
   shard_level_metrics = var.shard_level_metrics
-  tags = { CreatedBy = var.project_id }  # <-- FIXED: pass a map, not a string
+  tags = { CreatedBy = var.project_id }
 }
 
 # Kinesis taxi_predictions - output stream for prediction results
@@ -37,7 +38,7 @@ module "output_kinesis_stream" {
   shard_count = var.shard_count
   retention_period = var.retention_period
   shard_level_metrics = var.shard_level_metrics
-  tags = { CreatedBy = var.project_id }  # <-- FIXED: pass a map, not a string
+  tags = { CreatedBy = var.project_id }
 }
 
 # s3 model bucket for storing ML models

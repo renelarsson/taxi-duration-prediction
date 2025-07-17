@@ -1,5 +1,8 @@
+# src/models/predict.py
+# Model prediction utilities for taxi duration prediction.
+# Environment separation: Uses .env.dev for development (mlflow-models-rll), .env.prod for production (mlflow-models-rll-mlops-capstone)
+# All bucket, stream, and run_id values are loaded from environment variables for flexibility.
 
-# taxi-duration-prediction/src/models/predict.py
 import pickle
 import mlflow
 import mlflow.sklearn
@@ -8,10 +11,23 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 import os
 
-# Set MLflow S3 endpoint if provided
+# Set MLflow S3 endpoint if provided (for dev/prod separation)
 s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
 if s3_endpoint:
     os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
+
+def get_model_bucket():
+    """
+    Get the S3 bucket for ML models from environment.
+    Uses .env.dev for development, .env.prod for production.
+    """
+    return os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+
+def get_run_id():
+    """
+    Get the MLflow run ID from environment.
+    """
+    return os.getenv('RUN_ID')
 
 def load_model(model_path: str):
     """Load pickled model"""
@@ -92,34 +108,46 @@ def predict_single_trip(trip_data: dict, model, dv):
     
     return prediction[0]
 
-def load_mlflow_model(run_id: str):
+def load_mlflow_model(run_id: str = None):
     """
     Load model from MLflow.    
     Args:
-        run_id: MLflow run ID    
+        run_id: MLflow run ID (if not provided, loaded from environment)
     Returns:
         Loaded model
     """
-    import os
-    # Set tracking URI
+    # Set tracking URI from environment
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
-    
-    # Load model
-    model_uri = f"runs:/{run_id}/model"
-    model = mlflow.sklearn.load_model(model_uri)
-    
+    if run_id is None:
+        run_id = get_run_id()
+    # Use bucket from environment for S3-based model storage
+    model_bucket = get_model_bucket()
+    experiment_id = os.getenv('MLFLOW_EXPERIMENT_ID', '1')
+    # If using MLflow S3 artifact store, use full S3 URI
+    model_uri = f"s3://{model_bucket}/{experiment_id}/{run_id}/artifacts/model"
+    try:
+        model = mlflow.pyfunc.load_model(model_uri)
+    except Exception:
+        # Fallback to MLflow run URI if S3 fails
+        model_uri = f"runs:/{run_id}/model"
+        model = mlflow.sklearn.load_model(model_uri)
     return model
 
-def apply_model(input_file: str, run_id: str, output_file: str):
+def apply_model(input_file: str, run_id: str = None, output_file: str = None):
     """
     Apply model to new data - batch prediction    
     Args:
         input_file: Input data file path
-        run_id: MLflow run ID
-        output_file: Output predictions file path
+        run_id: MLflow run ID (optional, loaded from environment if not provided)
+        output_file: Output predictions file path (optional)
     """
     # Load data
     df = pd.read_parquet(input_file)
+    
+    # Validate data before prediction
+    if not validate_data(df):
+        print("Input data validation failed.")
+        return
     
     # Load model from MLflow
     model = load_mlflow_model(run_id)
@@ -132,9 +160,11 @@ def apply_model(input_file: str, run_id: str, output_file: str):
     
     # Save predictions
     df['predicted_duration'] = predictions
-    df.to_parquet(output_file, index=False)
-    
-    print(f"Predictions saved to {output_file}")
+    if output_file:
+        df.to_parquet(output_file, index=False)
+        print(f"Predictions saved to {output_file}")
+    else:
+        print(df[['ride_id', 'predicted_duration']].head())
 
 def validate_data(df: pd.DataFrame):
     """
@@ -163,3 +193,25 @@ def validate_data(df: pd.DataFrame):
         return False
     
     return True
+
+# Example usage for local testing
+if __name__ == "__main__":
+    # Set environment for local test (do not use in production)
+    os.environ['MODEL_BUCKET'] = 'mlflow-models-rll'  # Change to mlflow-models-rll-mlops-capstone for prod test
+    os.environ['RUN_ID'] = 'a986756f70a240cf8808a59ed77ba2d3'
+
+    # Example: batch prediction
+    input_file = 'data/test_trips.parquet'
+    output_file = 'data/predictions.parquet'
+    apply_model(input_file, os.environ['RUN_ID'], output_file)
+
+    # Example: single trip prediction
+    test_trip = {
+        'PULocationID': 161,
+        'DOLocationID': 236,
+        'trip_distance': 3.5
+    }
+    model = load_mlflow_model()
+    dv = load_preprocessor('models/dv.bin')
+    duration = predict_single_trip(test_trip, model, dv)
+    print(f"Predicted duration for test trip: {duration}")

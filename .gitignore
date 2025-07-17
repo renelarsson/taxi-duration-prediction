@@ -20,8 +20,8 @@ venv/
 .env
 
 # Environment files with secrets and user config
-.env.local-me
-.env.aws-me
+.env.prod
+.env.dev
 
 # IDE and OS files
 .vscode

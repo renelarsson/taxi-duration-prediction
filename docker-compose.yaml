@@ -1,21 +1,49 @@
+# docker-compose.yaml for Taxi Duration Prediction MLOps Project
+# Environment separation: Uses .env.dev for development, .env.prod for production.
+# All bucket, stream, endpoint, and credential values are loaded from environment variables for flexibility.
+
 services:
   backend:
     image: ${LOCAL_IMAGE_NAME}
     ports:
       - "8080:8080"
     environment:
+      # All environment variables below are loaded from .env.dev or .env.prod
       - PREDICTIONS_STREAM_NAME=${PREDICTIONS_STREAM_NAME}
-      - RUN_ID=Test123
+      - RUN_ID=${RUN_ID}
       - AWS_DEFAULT_REGION=${AWS_REGION}
       - MODEL_LOCATION=/app/model
       - KINESIS_ENDPOINT_URL=http://kinesis:4566/
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      # Add MODEL_BUCKET for environment separation if needed
+      - MODEL_BUCKET=${MODEL_BUCKET}
     volumes:
       - "./model:/app/model"
+
   kinesis:
     image: localstack/localstack
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=kinesis,lambda 
+      - SERVICES=kinesis,lambda
+
+# Usage:
+# - Use .env.dev for development and .env.prod for production.
+# - Example .env.dev:
+#   MODEL_BUCKET=mlflow-models-rll
+#   PREDICTIONS_STREAM_NAME=stg_taxi_predictions
+#   RUN_ID=Test123
+#   AWS_REGION=eu-north-1
+#   AWS_ACCESS_KEY_ID=test
+#   AWS_SECRET_ACCESS_KEY=test
+#
+# - Example .env.prod:
+#   MODEL_BUCKET=mlflow-models-rll-mlops-capstone
+#   PREDICTIONS_STREAM_NAME=prod_taxi_predictions
+#   RUN_ID=your-prod-run-id
+#   AWS_REGION=eu-north-1
+#   AWS_ACCESS_KEY_ID=your-prod-key
+#   AWS_SECRET_ACCESS_KEY=your-prod-secret
+#
+# Docker Compose will automatically substitute variables from the active .env file.

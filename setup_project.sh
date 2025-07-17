@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # =============================
 # User Settings (Change These!)
@@ -8,8 +8,23 @@
 # New users should change PROJECT_NAME to match their own project/repo name.
 PROJECT_NAME="taxi-duration-prediction" # <-- Change this to your desired project name
 
+# =============================
+# Environment Separation
+# =============================
+# Choose environment: dev or prod
+# Usage: ./setup_project.sh dev   OR   ./setup_project.sh prod
+ENVIRONMENT=${1:-dev}
+
+if [ "$ENVIRONMENT" == "prod" ]; then
+    cp .env.prod .env
+    echo "Using production environment (.env.prod)"
+else
+    cp .env.dev .env
+    echo "Using development environment (.env.dev)"
+fi
+
 # Create the main project directory and move into it
-mkdir $PROJECT_NAME && cd $PROJECT_NAME
+mkdir -p $PROJECT_NAME && cd $PROJECT_NAME
 
 # =============================
 # Directory Structure Creation
@@ -57,6 +72,8 @@ README.md
 .gitignore
 .env
 .env.example
+.env.dev
+.env.prod
 requirements.txt
 requirements-dev.txt
 .pre-commit-config.yaml
@@ -135,4 +152,4 @@ rm .gitkeep_structure
 # Initializes a new git repository in your project folder.
 git init
 
-echo "Project structure created successfully!"
+echo "Project structure created successfully with environment separation!"

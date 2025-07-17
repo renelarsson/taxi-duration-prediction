@@ -20,7 +20,44 @@ Build, deploy, and monitor an ML model using:
 
 ---
 
+## Environment Separation
+
+This project supports **environment separation** for development and production:
+
+- **Key Files for Environment Separation:**
+
+  - `.env.dev` — Development environment variables
+  - `.env.prod` — Production environment variables
+  - `template.yaml` — AWS SAM template (parameters for buckets, streams, etc.)
+  - `terraform/vars/stg.tfvars` — Terraform dev variables
+  - `terraform/vars/prod.tfvars` — Terraform prod variables
+  - `.github/workflows/cd.yaml` — CI/CD pipeline, uses correct bucket per environment
+  - `sam-env.json` — Local SAM testing, update values for dev/prod as needed
+
+- **Development:**  
+  - Use `.env.dev` for local development and testing.
+  - Example: `MODEL_BUCKET=mlflow-models-rll`
+  - Streams: `stg_taxi_trip_events`, `stg_taxi_predictions`
+  - S3 endpoint: LocalStack or AWS dev resources.
+
+- **Production:**  
+  - Use `.env.prod` for real AWS deployment.
+  - Example: `MODEL_BUCKET=mlflow-models-rll-mlops-capstone`
+  - Streams: `prod_taxi_trip_events`, `prod_taxi_predictions`
+  - S3 endpoint: AWS production resources.
+
+All code loads environment variables using `os.getenv` or equivalent, so you can switch environments by changing the `.env` file or deployment configuration.  
+No bucket, stream, or run_id values are hardcoded in production logic.
+
+---
+
 ## Project Structure
+
+  - `src/` — Source code for model training, inference, and deployment
+  - `workflows/` — Prefect and batch inference pipelines
+  - `terraform/` — Infrastructure as code for AWS resources
+  - `.github/workflows/` — CI/CD automation
+  - `models/` — Model artifacts and utilities
 
 ```
 taxi-duration-prediction/
@@ -73,6 +110,25 @@ taxi-duration-prediction/
 
 ---
 
+## Usage
+
+1. **Set up your environment:**
+   - Copy `.env.dev` or `.env.prod` to `.env` as needed.
+   - Export environment variables or use a tool like `python-dotenv`.
+
+2. **Development:**
+   - Train and test locally using `.env.dev`.
+   - Use LocalStack for AWS emulation if desired.
+
+3. **Production:**
+   - Deploy using `.env.prod` and real AWS resources.
+   - Use `sam deploy --parameter-overrides ModelBucket=mlflow-models-rll-mlops-capstone ...` for production.
+
+4. **Switching environments:**
+   - Change the `.env` file or deployment parameters.
+   - No code changes required—just update environment variables.
+
+---
 
 ## How to Reproduce / Setup
 
@@ -118,7 +174,8 @@ To run or reproduce the project:
    pip install -r requirements-dev.txt
    ```
 4. **Set up environment variables:**
-   - Copy `.env.example` to `.env` and fill in your secrets and configuration.
+   - Copy `.env.dev` or `.env.prod` to `.env` as needed and fill in your secrets and configuration.
+   - All code loads buckets, streams, and run IDs from environment variables.
 5. **Start services:**
    ```bash
    docker-compose up
@@ -129,13 +186,13 @@ To run or reproduce the project:
    - Run workflows in `workflows/` or scripts in `src/`.
 8. **Deploy the model:**
    - Use scripts in `scripts/` or CI/CD pipeline.
-7. **Run tests:**  
+9. **Run tests:**  
    ```bash
    pytest
    ```
    for unit/integration tests.
-8. **Monitor:**  
-   Use Grafana dashboards and Evidently monitoring.
+10. **Monitor:**  
+    Use Grafana dashboards and Evidently monitoring.
 
 ---
 
@@ -157,5 +214,15 @@ This project is part of the DataTalksClub MLOps Zoomcamp course.
 
 ---
 
-**Note:**  
+## Additional Notes
+
+- **No hardcoded values:** All environment-specific values (buckets, streams, run IDs) are loaded from environment variables.
+- **Local testing:** For quick local tests, you may set environment variables in code, but for deployment always use `.env.dev`/`.env.prod` or your CI/CD pipeline.
+- **Documentation:** Update this README if you add new environment variables or change the separation logic.
+
 For reproducibility, always use the `setup_project.sh` script to initialize your environment. This ensures all dependencies and configurations are set up correctly.
+
+**Environment separation:**  
+- Use `.env.dev` for development and `.env.prod` for production.
+- No hardcoded values for buckets, streams, or run IDs in production logic.
+- All environment-specific configuration is loaded from environment variables.

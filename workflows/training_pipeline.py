@@ -1,6 +1,6 @@
-"""
-Training pipeline using Prefect.
-"""
+# src/workflows/training_pipeline.py
+# Training pipeline using Prefect.
+
 import os
 import sys
 import pathlib

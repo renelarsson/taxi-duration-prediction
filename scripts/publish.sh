@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+# scripts/publish.sh
+#!/usr/bin/env bash 
 # Docker image publishing script for taxi duration prediction
 # Based on MLOps Zoomcamp Module 6 publish patterns (app. 70 files for complete MLOps system)
 

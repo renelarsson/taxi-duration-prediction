@@ -1,6 +1,8 @@
-"""
-Inference pipeline using Prefect.
-"""
+# workflows/inference_pipeline.py
+# Inference pipeline using Prefect.
+# Environment separation: Uses .env.dev for development (mlflow-models-rll), .env.prod for production (mlflow-models-rll-mlops-capstone)
+# MODEL_BUCKET and OUTPUT_BUCKET are loaded from environment variables for flexibility.
+
 import os
 import sys
 import uuid
@@ -43,8 +45,15 @@ def prepare_dictionaries(df: pd.DataFrame):
     dicts = df[categorical + numerical].to_dict(orient='records')
     return dicts
 
+def get_model_bucket():
+    """
+    Get the S3 bucket for ML models from environment.
+    Uses .env.dev for development, .env.prod for production.
+    """
+    return os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+
 def load_model(run_id):
-    model_bucket = os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+    model_bucket = get_model_bucket()
     logged_model = f's3://{model_bucket}/1/{run_id}/artifacts/model'
     # Set MLflow S3 endpoint if provided
     s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
@@ -52,6 +61,13 @@ def load_model(run_id):
         os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
     model = mlflow.pyfunc.load_model(logged_model)
     return model
+
+def get_output_bucket():
+    """
+    Get the S3 bucket for output predictions from environment.
+    Uses OUTPUT_BUCKET env variable, defaults to 'taxi-duration-predictions'.
+    """
+    return os.getenv('OUTPUT_BUCKET', 'taxi-duration-predictions')
 
 def save_results(df, y_pred, run_id, output_file):
     df_result = pd.DataFrame()
@@ -92,7 +108,7 @@ def get_paths(run_date, taxi_type, run_id):
 
     input_file = f's3://nyc-tlc/trip data/{taxi_type}_tripdata_{year:04d}-{month:02d}.parquet'
     
-    output_bucket = os.getenv('OUTPUT_BUCKET', 'taxi-duration-predictions')
+    output_bucket = get_output_bucket()
     output_file = f's3://{output_bucket}/taxi_type={taxi_type}/year={year:04d}/month={month:02d}/{run_id}.parquet'
 
     return input_file, output_file
