@@ -4,7 +4,7 @@ terraform {
   backend "s3" {
     # For dev, use: mlflow-models-rll -> .env.local-me, stg.tfvars, deploy_manual.sh
     # For prod, use: mlflow-models-rll-mlops-capstone -> template.yaml (prod stack), GitHub Actions deploy steps
-    bucket  = var.model_bucket
+    bucket  = "mlflow-models-rll"
     key     = "mlops-capstone-${var.project_id}.tfstate"
     region  = "eu-north-1"
     encrypt = true
