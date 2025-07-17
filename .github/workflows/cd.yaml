@@ -64,7 +64,7 @@ jobs:
         id: get-model-artifacts
         env:
           # For dev, use: mlflow-models-rll (.env.dev)
-          # For prod, use: mlflow-models-rll-mlops-capstone (.env.prod, prod.tfvars)
+          # For prod, use: mlflow-models-rll-mlops-capstone (.env.prod, prod.tfvars) 
           MODEL_BUCKET_DEV: "mlflow-models-rll"
           MODEL_BUCKET_PROD: ${{ steps.tf-apply.outputs.model_bucket }}
         run: |
@@ -102,5 +102,7 @@ jobs:
               echo $STATE
           done
 
-          aws lambda update-function-configuration --function-name $LAMBDA_FUNCTION \
-            --environment 'Variables={"PREDICTIONS_STREAM_NAME":"'"$PREDICTIONS_STREAM_NAME"'","MODEL_BUCKET":"'"$MODEL_BUCKET"'","RUN_ID":"'"$RUN_ID"'"}'
+          aws lambda update-function-configuration \
+            --function-name $LAMBDA_FUNCTION \
+            --environment "Variables={PREDICTIONS_STREAM_NAME=$PREDICTIONS_STREAM_NAME,MODEL_BUCKET=$MODEL_BUCKET,RUN_ID=$RUN_ID,AWS_DEFAULT_REGION=$AWS_REGION}" \
+            --region $AWS_REGION

@@ -67,9 +67,9 @@ echo "Updating Lambda function configuration..."
 # Update Lambda function configuration
 # https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
 aws lambda update-function-configuration \
-    --function-name "${LAMBDA_FUNCTION}" \
-    --environment "Variables={PREDICTIONS_STREAM_NAME=prod_taxi_predictions-mlops-capstone,MODEL_BUCKET=mlflow-models-rll-mlops-capstone,RUN_ID=a986756f70a240cf8808a59ed77ba2d3,AWS_DEFAULT_REGION=eu-north-1}" \
-    --region "${AWS_REGION}"
+  --function-name $LAMBDA_FUNCTION \
+  --environment "Variables={PREDICTIONS_STREAM_NAME=$PREDICTIONS_STREAM_NAME,MODEL_BUCKET=$MODEL_BUCKET,RUN_ID=$RUN_ID,AWS_DEFAULT_REGION=$AWS_REGION}" \
+  --region $AWS_REGION
 
 if [ $? -eq 0 ]; then
     echo "Lambda function configuration updated successfully"
