@@ -102,7 +102,7 @@ jobs:
               echo $STATE
           done
 
-          aws lambda update-function-configuration \
+          9 \
             --function-name $LAMBDA_FUNCTION \
             --environment "Variables={PREDICTIONS_STREAM_NAME=$PREDICTIONS_STREAM_NAME,MODEL_BUCKET=$MODEL_BUCKET,RUN_ID=$RUN_ID}" \
             --region $AWS_REGION
