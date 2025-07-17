@@ -68,7 +68,7 @@ variables="{PREDICTIONS_STREAM_NAME=${PREDICTIONS_STREAM_NAME}, MODEL_BUCKET=${M
 # https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
 aws lambda update-function-configuration \
     --function-name ${LAMBDA_FUNCTION} \
-    --environment "Variables=${variables}" \
+    --environment ${variables} \
     --region ${AWS_REGION}
 
 if [ $? -eq 0 ]; then
