@@ -62,14 +62,14 @@ fi
 echo "Updating Lambda function configuration..."
 
 # Set environment variables for Lambda function
-variables="{PREDICTIONS_STREAM_NAME=${PREDICTIONS_STREAM_NAME}, MODEL_BUCKET=${MODEL_BUCKET_PROD}, RUN_ID=${RUN_ID}, AWS_DEFAULT_REGION=${AWS_REGION}}"
+#variables="{PREDICTIONS_STREAM_NAME=${PREDICTIONS_STREAM_NAME}, MODEL_BUCKET=${MODEL_BUCKET_PROD}, RUN_ID=${RUN_ID}, AWS_DEFAULT_REGION=${AWS_REGION}}"
 
 # Update Lambda function configuration
 # https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
 aws lambda update-function-configuration \
-    --function-name ${LAMBDA_FUNCTION} \
-    --environment ${variables} \
-    --region ${AWS_REGION}
+    --function-name "${LAMBDA_FUNCTION}" \
+    --environment file://lambda_env.json \
+    --region "${AWS_REGION}"
 
 if [ $? -eq 0 ]; then
     echo "Lambda function configuration updated successfully"
