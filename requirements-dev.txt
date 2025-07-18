@@ -2,7 +2,7 @@
 # Development dependencies for taxi duration prediction
 
 # Include production requirements
--r requirements.txt
+-r terraform/requirements.txt
 
 # Development and exploration (from Module 2.2, 5.2)
 jupyter
