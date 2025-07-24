@@ -1,3 +1,4 @@
+# ECR repository for storing the Lambda Docker image
 resource "aws_ecr_repository" "repo" {
   name                 = var.ecr_repo_name
   image_tag_mutability = "MUTABLE"
@@ -9,9 +10,8 @@ resource "aws_ecr_repository" "repo" {
   force_delete = true
 }
 
-# In practice, the Image build-and-push step is handled separately by the CI/CD pipeline and not the IaC script.
-# But because the lambda config would fail without an existing Image URI in ECR,
-# we can also upload any base image to bootstrap the lambda config, unrelated to your Inference logic
+# Build and push the Docker image to ECR using local-exec provisioner
+# NOTE: The Docker build context is set to the project root so all files are available.
 resource "null_resource" "ecr_image" {
   triggers = {
     python_file = md5(file(var.lambda_function_local_path))
@@ -21,20 +21,21 @@ resource "null_resource" "ecr_image" {
   provisioner "local-exec" {
     command = <<EOF
       aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${var.account_id}.dkr.ecr.${var.region}.amazonaws.com
-      ls Dockerfile
-      docker build -f Dockerfile -t ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag} .
+      docker build -f terraform/Dockerfile -t ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag} .
       docker push ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag}
     EOF
-    working_dir = "${path.module}/../.."
+    working_dir = "${path.module}/../.." # Set context to project root
   }
-} 
+}
 
+# Get the image URI after pushing to ECR
 data "aws_ecr_image" "lambda_image" {
   depends_on      = [null_resource.ecr_image]
   repository_name = var.ecr_repo_name
   image_tag       = var.ecr_image_tag
 }
 
+# Output the image URI for use in Lambda or other modules
 output "image_uri" {
   value = "${aws_ecr_repository.repo.repository_url}:${data.aws_ecr_image.lambda_image.image_tag}"
 }
