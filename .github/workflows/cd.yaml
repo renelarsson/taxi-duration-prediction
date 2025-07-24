@@ -29,9 +29,10 @@ jobs:
 
       - name: TF plan
         id: tf-plan
-        working-directory: .
+        working-directory: terraform   
         run: |
-          terraform init -backend-config="key=mlops-capstone-prod.tfstate" -reconfigure && terraform plan -var-file=vars/prod.tfvars
+          terraform init -backend-config="key=mlops-capstone-prod.tfstate" -reconfigure
+          terraform plan -var-file=vars/prod.tfvars
 
       - name: TF Apply
         id: tf-apply

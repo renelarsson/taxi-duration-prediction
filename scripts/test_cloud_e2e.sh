@@ -19,7 +19,7 @@ echo "AWS Region: ${AWS_REGION}"
 echo "Input stream: ${KINESIS_STREAM_INPUT}"
 echo "Output stream: ${KINESIS_STREAM_OUTPUT}"
 
-# Test ride data (course pattern)
+# Test ride data 
 TEST_RIDE_DATA='{
     "ride": {
         "PULocationID": 130,
