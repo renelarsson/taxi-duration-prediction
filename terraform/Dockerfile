@@ -11,14 +11,11 @@ RUN pip install pytest
 COPY terraform/requirements.txt .
 RUN pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-# Copy the entire terraform directory into the Lambda task root
+# Copy directories into the Lambda task root
 COPY terraform/ ${LAMBDA_TASK_ROOT}/terraform/
-
-# Copy the src directory into the Lambda task root
 COPY src/ ${LAMBDA_TASK_ROOT}/src/
-
+COPY .env.dev ${LAMBDA_TASK_ROOT}/.env.dev
 COPY tests/ ${LAMBDA_TASK_ROOT}/tests/
-
 COPY tests/integration/ ${LAMBDA_TASK_ROOT}/tests/integration/
 
 # Set PYTHONPATH so Python can find the src package
