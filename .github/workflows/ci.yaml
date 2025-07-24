@@ -1,4 +1,4 @@
-name: CI-Tests
+name: CI-Tests 
 on:
   pull_request:
     branches:
@@ -40,9 +40,7 @@ jobs:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Integration Test
-        run: |
-          cd integration-test
-          bash run.sh
+        run: pytest tests/integration
 
 tf-plan:
   runs-on: ubuntu-latest

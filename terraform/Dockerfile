@@ -19,7 +19,7 @@ COPY src/ ${LAMBDA_TASK_ROOT}/src/
 
 COPY tests/ ${LAMBDA_TASK_ROOT}/tests/
 
-COPY integration-test/ ${LAMBDA_TASK_ROOT}/integration-test/
+COPY tests/integration/ ${LAMBDA_TASK_ROOT}/tests/integration/
 
 # Set PYTHONPATH so Python can find the src package
 ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
