@@ -3,7 +3,7 @@
 # Environment separation: Uses .env.dev for development (mlflow-models-rll), .env.prod for production (mlflow-models-rll-mlops-capstone)
 # MODEL_BUCKET and related values are set via Terraform outputs and environment variables
 
-name: CD-Deploy
+name: CD-Deploy 
 on:
   push:
     branches:
@@ -29,7 +29,7 @@ jobs:
 
       - name: TF plan
         id: tf-plan
-        working-directory: terraform
+        working-directory: .
         run: |
           terraform init -backend-config="key=mlops-capstone-prod.tfstate" -reconfigure && terraform plan -var-file=vars/prod.tfvars
 
