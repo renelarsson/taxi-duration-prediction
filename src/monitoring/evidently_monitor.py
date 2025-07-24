@@ -238,7 +238,7 @@ def save_report_to_s3(report_dict, filename):
     import json
     bucket = MONITORING_BUCKET
     try:
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', endpoint_url=os.getenv('MLFLOW_S3_ENDPOINT_URL'))
         s3.put_object(
             Bucket=bucket,
             Key=filename,

@@ -1,0 +1,19 @@
+# Use .env.prod for AWS deployment.
+version: "3.8"
+
+services:
+  backend:
+    image: ${LOCAL_IMAGE_NAME}
+    ports:
+      - "8080:8080"
+    environment:
+      PREDICTIONS_STREAM_NAME: ${PREDICTIONS_STREAM_NAME}
+      RUN_ID: ${RUN_ID}
+      AWS_DEFAULT_REGION: ${AWS_REGION}
+      MODEL_LOCATION: /app/model
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      MODEL_BUCKET: ${MODEL_BUCKET}
+    # Do NOT set KINESIS_ENDPOINT_URL or MLFLOW_S3_ENDPOINT_URL for AWS; boto3 will use AWS defaults.
+    volumes:
+      - "./model:/app/model"

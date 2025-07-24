@@ -1,14 +1,30 @@
 # Dockerfile for AWS Lambda Python 3.9
 # This Dockerfile sets up a Lambda function environment with Python 3.9
 # and installs the necessary dependencies from requirements.txt.
+
 FROM public.ecr.aws/lambda/python:3.9
 
 RUN pip install -U pip
+RUN pip install pytest
 
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+# Copy requirements.txt from terraform/ and install dependencies into Lambda task root
+COPY terraform/requirements.txt .
+RUN pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-COPY lambda_function.py ./
-COPY model.py ./
+# Copy the entire terraform directory into the Lambda task root
+COPY terraform/ ${LAMBDA_TASK_ROOT}/terraform/
 
-CMD [ "lambda_function.lambda_handler" ]
+# Copy the src directory into the Lambda task root
+COPY src/ ${LAMBDA_TASK_ROOT}/src/
+
+COPY tests/ ${LAMBDA_TASK_ROOT}/tests/
+
+COPY integration-test/ ${LAMBDA_TASK_ROOT}/integration-test/
+
+# Set PYTHONPATH so Python can find the src package
+ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
+
+WORKDIR /app
+
+# Set the handler
+CMD ["terraform/lambda_function.lambda_handler"]

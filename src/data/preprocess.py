@@ -69,7 +69,7 @@ def save_preprocessor(dv: DictVectorizer, filepath: str):
         buf = io.BytesIO()
         pickle.dump(dv, buf)
         buf.seek(0)
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', endpoint_url=os.getenv('MLFLOW_S3_ENDPOINT_URL'))
         s3.put_object(Bucket=bucket, Key=key, Body=buf.getvalue())
     else:
         with open(filepath, 'wb') as f_out:
@@ -87,7 +87,7 @@ def load_preprocessor(filepath: str) -> DictVectorizer:
         import boto3
         bucket = filepath.split("/")[2]
         key = "/".join(filepath.split("/")[3:])
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', endpoint_url=os.getenv('MLFLOW_S3_ENDPOINT_URL'))
         obj = s3.get_object(Bucket=bucket, Key=key)
         dv = pickle.load(obj['Body'])
         return dv

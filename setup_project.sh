@@ -97,7 +97,9 @@ infrastructure/terraform/modules/lambda/iam.tf
 lambda_function.py
 model.py
 Dockerfile
-docker-compose.yaml
+docker-compose.local.yaml
+docker-compose.aws.yaml
+docker-compose.yaml 
 model/MLmodel
 model/README.txt
 model/conda.yaml
@@ -153,3 +155,10 @@ rm .gitkeep_structure
 git init
 
 echo "Project structure created successfully with environment separation!"
+echo ""
+echo "NOTE:"
+echo "  - Use docker-compose.local.yaml for local development/testing with LocalStack:"
+echo "      docker-compose -f docker-compose.local.yaml up"
+echo "  - Use docker-compose.aws.yaml for AWS deployment:"
+echo "      docker-compose -f docker-compose.aws.yaml up"
+echo "  - docker-compose.yaml is kept as a TEMPLATE ONLY – do

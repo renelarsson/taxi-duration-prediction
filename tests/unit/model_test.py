@@ -1,4 +1,3 @@
-# tests/unit/model_test.py
 """Unit tests for taxi duration prediction project.
 Based on MLOps Zoomcamp Module 6 patterns.
 """
@@ -7,13 +6,11 @@ import terraform.model as model
 
 def read_text(file):
     test_directory = Path(__file__).parent.parent
-
     with open(test_directory / file, 'rt', encoding='utf-8') as f_in:
         return f_in.read().strip()
 
 def test_base64_decode():
     base64_input = read_text('data.b64')
-
     actual_result = model.base64_decode(base64_input)
     expected_result = {
         "ride": {
@@ -23,56 +20,49 @@ def test_base64_decode():
         },
         "ride_id": 256,
     }
-
     assert actual_result == expected_result
 
-def test_prepare_features():
-    model_service = model.ModelService(None)
+class DummyVectorizer:
+    def transform(self, X):
+        return [X]
 
+def test_prepare_features():
+    model_service = model.ModelService(None, DummyVectorizer())
     ride = {
         "PULocationID": 130,
         "DOLocationID": 205,
         "trip_distance": 3.66,
     }
-
     actual_features = model_service.prepare_features(ride)
-
     expected_features = {
         "PU_DO": "130_205",
         "trip_distance": 3.66,
     }
-
     assert actual_features == expected_features
 
 class ModelMock:
     def __init__(self, value):
         self.value = value
-
     def predict(self, X):
         n = len(X)
         return [self.value] * n
 
 def test_predict():
     model_mock = ModelMock(10.0)
-    model_service = model.ModelService(model_mock)
-
+    model_service = model.ModelService(model_mock, DummyVectorizer())
     features = {
         "PU_DO": "130_205",
         "trip_distance": 3.66,
     }
-
     actual_prediction = model_service.predict(features)
     expected_prediction = 10.0
-
     assert actual_prediction == expected_prediction
 
 def test_lambda_handler():
     model_mock = ModelMock(10.0)
     model_version = 'Test123'
-    model_service = model.ModelService(model_mock, model_version)
-
+    model_service = model.ModelService(model_mock, DummyVectorizer(), model_version)
     base64_input = read_text('data.b64')
-
     event = {
         "Records": [
             {
@@ -82,7 +72,6 @@ def test_lambda_handler():
             }
         ]
     }
-
     actual_predictions = model_service.lambda_handler(event)
     expected_predictions = {
         'predictions': [
@@ -96,5 +85,4 @@ def test_lambda_handler():
             }
         ]
     }
-
     assert actual_predictions == expected_predictions

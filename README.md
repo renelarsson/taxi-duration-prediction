@@ -83,7 +83,9 @@ taxi-duration-prediction/
 ├── lambda_function.py         # Lambda entry point
 ├── model.py                   # Core ML logic
 ├── Dockerfile                 # Container image definition
-├── docker-compose.yaml        # Service orchestration
+├── docker-compose.local.yaml  # Local development (LocalStack) orchestration
+├── docker-compose.aws.yaml    # AWS deployment orchestration
+├── docker-compose.yaml        # TEMPLATE ONLY – do not use directly; see below
 ├── requirements.txt           # Production dependencies
 ├── requirements-dev.txt       # Development dependencies
 ├── Makefile                   # Automation commands
@@ -97,7 +99,7 @@ taxi-duration-prediction/
 
 ---
 
-## Technologies Used
+## Technologies Used 
 
 - **Cloud:** AWS (Lambda, S3, Kinesis, ECR), LocalStack for local AWS emulation
 - **Experiment Tracking:** MLflow
@@ -127,6 +129,19 @@ taxi-duration-prediction/
 4. **Switching environments:**
    - Change the `.env` file or deployment parameters.
    - No code changes required—just update environment variables.
+---
+
+**Note:**  
+- `docker-compose.yaml` is now kept as a **template only**.  
+- **Do not use `docker-compose.yaml` directly.**  
+- For local development and testing with LocalStack, use `docker-compose.local.yaml`:
+  ```bash
+  docker-compose -f docker-compose.local.yaml up
+```
+- For AWS deployment, use `docker-compose.aws.yaml`:
+  ```bash
+  docker-compose -f docker-compose.aws.yaml up
+```
 
 ---
 
