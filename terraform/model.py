@@ -1,7 +1,7 @@
 """
-ModelService for streaming inference.
-Loads model and DictVectorizer from MLflow S3 artifacts.
-Includes KinesisCallback for streaming predictions.
+ModelService for streaming inference
+Loads model and DictVectorizer from MLflow S3 artifacts
+Includes KinesisCallback for streaming predictions
 """
 import os
 import json
