@@ -54,7 +54,7 @@ services:
 # - For deployment test/staging: use .env.stg and adjust as needed.
 #
 # Example .env.dev:
-#   MODEL_BUCKET=mlflow-models-rll
+#   MODEL_BUCKET=rll-models-dev
 #   PREDICTIONS_STREAM_NAME=stg_taxi_predictions
 #   RUN_ID=Test123
 #   AWS_REGION=eu-north-1
@@ -64,7 +64,7 @@ services:
 #   MLFLOW_S3_ENDPOINT_URL=http://localstack:4566
 #
 # Example .env.prod:
-#   MODEL_BUCKET=mlflow-models-rll-mlops-capstone
+#   MODEL_BUCKET=rll-models-prod
 #   PREDICTIONS_STREAM_NAME=prod_taxi_predictions
 #   RUN_ID=your-prod-run-id
 #   AWS_REGION=eu-north-1

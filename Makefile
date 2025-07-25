@@ -56,7 +56,7 @@ full-test:
 	@echo "Activating environment and starting services..."
 	conda run -n myenv docker-compose --env-file .env.dev -f docker-compose.local.yaml up -d
 	sleep 5
-	aws --endpoint-url=http://localhost:4566 s3 mb s3://mlflow-models-rll --region eu-north-1 || true
+	aws --endpoint-url=http://localhost:4566 s3 mb s3://rll-models-dev --region eu-north-1 || true
 	@echo "Training model..."
 	conda run -n myenv docker exec taxi-duration-prediction-backend-1 bash -c "set -a; source /var/task/.env.dev; set +a; python -m src.models.train"
 	@echo "Running unit tests..."

@@ -15,7 +15,7 @@ from deepdiff import DeepDiff
 LAMBDA_ENDPOINT = os.getenv('LAMBDA_ENDPOINT', 'http://localhost:8080/2015-03-31/functions/function/invocations')
 
 # If you need to pass bucket, stream, or run_id, load them from environment as well
-MODEL_BUCKET = os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+MODEL_BUCKET = os.getenv('MODEL_BUCKET', 'rll-models-dev')
 RUN_ID = os.getenv('RUN_ID', 'Test123')
 
 with open('event.json', 'rt', encoding='utf-8') as f_in:

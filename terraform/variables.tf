@@ -1,7 +1,7 @@
-# terraform/variables.tf
+# terraform/variables.tf 
 # Streaming: Taxi Data → Kinesis Input → Lambda (ML Model) → Kinesis Output → Monitoring
-# Environment separation: Use stg.tfvars + .env.dev for development (mlflow-models-rll)
-#                        Use prod.tfvars + .env.prod for production (mlflow-models-rll-mlops-capstone)
+# Environment separation: Use stg.tfvars + .env.dev for development (rll-models-dev )
+#                        Use prod.tfvars + .env.prod for production (rll-models-prod)
 
 variable "aws_region" {
   description = "AWS region to create resources"
@@ -33,15 +33,14 @@ variable "retention_period" {
 }
 
 variable "shard_count" {
-  description = "Number of shards for Kinesis streams"
+  description = "Number of shards for Kinesis streams" 
   type        = number
   default     = 2
 }
 
 variable "model_bucket" {
-  description = "S3 bucket for storing ML models (dev: mlflow-models-rll, prod: mlflow-models-rll-mlops-capstone)"
+  description = "S3 bucket for storing ML models"
   type        = string
-  default     = "mlflow-models-rll"
 }
 
 variable "lambda_function_local_path" {

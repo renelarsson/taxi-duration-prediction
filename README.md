@@ -36,13 +36,13 @@ This project supports **environment separation** for development and production:
 
 - **Development:**  
   - Use `.env.dev` for local development and testing.
-  - Example: `MODEL_BUCKET=mlflow-models-rll`
+  - Example: `MODEL_BUCKET=rll-models-dev`
   - Streams: `stg_taxi_trip_events`, `stg_taxi_predictions`
   - S3 endpoint: LocalStack or AWS dev resources.
 
 - **Production:**  
   - Use `.env.prod` for real AWS deployment.
-  - Example: `MODEL_BUCKET=mlflow-models-rll-mlops-capstone`
+  - Example: `MODEL_BUCKET=rll-models-prod`
   - Streams: `prod_taxi_trip_events`, `prod_taxi_predictions`
   - S3 endpoint: AWS production resources.
 
@@ -124,7 +124,7 @@ taxi-duration-prediction/
 
 3. **Production:**
    - Deploy using `.env.prod` and real AWS resources.
-   - Use `sam deploy --parameter-overrides ModelBucket=mlflow-models-rll-mlops-capstone ...` for production.
+   - Use `sam deploy --parameter-overrides ModelBucket=rll-models-prod ...` for production.
 
 4. **Switching environments:**
    - Change the `.env` file or deployment parameters.

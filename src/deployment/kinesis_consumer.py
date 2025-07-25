@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 KINESIS_ENDPOINT = os.getenv('KINESIS_ENDPOINT_URL', "http://localhost:4566")
 INPUT_STREAM_NAME = os.getenv('INPUT_STREAM_NAME', 'ride-events')
 OUTPUT_STREAM_NAME = os.getenv('OUTPUT_STREAM_NAME', 'ride_predictions')
-MODEL_BUCKET = os.getenv('MODEL_BUCKET', 'mlflow-models-rll')  # For future model loading if needed
+MODEL_BUCKET = os.getenv('MODEL_BUCKET', 'rll-models-dev')  # For future model loading if needed
 TEST_RUN = os.getenv('TEST_RUN', 'False') == 'True'
 
 # AWS client setup

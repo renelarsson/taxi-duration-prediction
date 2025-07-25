@@ -1,7 +1,7 @@
 """
-ModelService for streaming inference.
-Loads model and DictVectorizer from MLflow S3 artifacts.
-Includes KinesisCallback for streaming predictions.
+ModelService for streaming inference
+Loads model and DictVectorizer from MLflow S3 artifacts
+Includes KinesisCallback for streaming predictions
 """
 import os
 import json
@@ -11,12 +11,12 @@ import mlflow
 import pickle
 
 def get_model_location(run_id):
-    model_bucket = os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+    model_bucket = os.getenv('MODEL_BUCKET', 'rll-models-dev')
     experiment_id = os.getenv('MLFLOW_EXPERIMENT_ID', '1')
     return f's3://{model_bucket}/{experiment_id}/{run_id}/artifacts/model'
 
 def get_dict_vectorizer_location(run_id):
-    model_bucket = os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+    model_bucket = os.getenv('MODEL_BUCKET', 'rll-models-dev')
     experiment_id = os.getenv('MLFLOW_EXPERIMENT_ID', '1')
     return f's3://{model_bucket}/{experiment_id}/{run_id}/artifacts/dict_vectorizer.pkl'
 

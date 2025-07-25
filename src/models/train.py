@@ -46,7 +46,7 @@ def train_model(X_train, X_val, y_train, y_val, dv):
     if s3_endpoint:
         os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
 
-    bucket = os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+    bucket = os.getenv('MODEL_BUCKET', 'rll-models-dev')
     aws_region = os.getenv("AWS_REGION", "us-east-1")
     if s3_endpoint:
         s3 = boto3.client("s3", endpoint_url=s3_endpoint, region_name=aws_region)

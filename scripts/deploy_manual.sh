@@ -15,10 +15,13 @@ if [ "$USE_LOCALSTACK" = "true" ]; then
     echo "Using LocalStack endpoint: $LS_ENDPOINT"
 fi
 
-export MODEL_BUCKET_PROD="${ENVIRONMENT}-mlflow-models-${PROJECT_NAME}"
-export PREDICTIONS_STREAM_NAME="${ENVIRONMENT}_ride_predictions_${PROJECT_NAME}"
-export LAMBDA_FUNCTION="${ENVIRONMENT}_prediction_lambda_${PROJECT_NAME}"
-export MODEL_BUCKET_DEV=${MODEL_BUCKET_DEV:-"mlflow-models-rll"}
+if [ "$ENVIRONMENT" = "prod" ]; then
+    export MODEL_BUCKET_PROD="rll-models-prod"
+    export MODEL_BUCKET_DEV="rll-models-dev"
+else
+    export MODEL_BUCKET_PROD="rll-models-dev"
+    export MODEL_BUCKET_DEV="rll-models-dev"
+fi
 
 echo "Starting manual deployment for ${ENVIRONMENT} environment"
 echo "Region: ${AWS_REGION}"

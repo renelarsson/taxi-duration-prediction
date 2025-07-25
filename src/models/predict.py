@@ -1,6 +1,6 @@
 # src/models/predict.py
 # Model prediction utilities for taxi duration prediction.
-# Environment separation: Uses .env.dev for development (mlflow-models-rll), .env.prod for production (mlflow-models-rll-mlops-capstone)
+# Environment separation: Uses .env.dev for development (rll-models-dev), .env.prod for production (rll-models-prod)
 # All bucket, stream, and run_id values are loaded from environment variables for flexibility.
 
 import pickle
@@ -21,7 +21,7 @@ def get_model_bucket():
     Get the S3 bucket for ML models from environment.
     Uses .env.dev for development, .env.prod for production.
     """
-    return os.getenv('MODEL_BUCKET', 'mlflow-models-rll')
+    return os.getenv('MODEL_BUCKET', 'rll-models-dev')
 
 def get_run_id():
     """
@@ -197,7 +197,7 @@ def validate_data(df: pd.DataFrame):
 # Example usage for local testing
 if __name__ == "__main__":
     # Set environment for local test (do not use in production)
-    os.environ['MODEL_BUCKET'] = 'mlflow-models-rll'  # Change to mlflow-models-rll-mlops-capstone for prod test
+    os.environ['MODEL_BUCKET'] = 'rll-models-dev'  # Change to rll-models-prod for prod test
     os.environ['RUN_ID'] = 'a986756f70a240cf8808a59ed77ba2d3'
 
     # Example: batch prediction

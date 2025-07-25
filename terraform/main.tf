@@ -2,12 +2,12 @@
 terraform {
   required_version = ">= 1.0"
   backend "s3" {
-    # For dev, use: mlflow-models-rll -> .env.local-me, stg.tfvars, deploy_manual.sh
-    # For prod, use: mlflow-models-rll-mlops-capstone -> template.yaml (prod stack), GitHub Actions deploy steps
-    bucket  = "mlflow-models-rll"
+    # For dev, use: rll-models-dev -> .env.local-me, stg.tfvars, deploy_manual.sh
+    # For prod, use: rll-models-prod -> template.yaml (prod stack), GitHub Actions deploy steps
+    bucket  = "rll-models-dev"
     key     = "mlops-capstone-prod.tfstate"
     region  = "eu-north-1"
-    encrypt = true
+    encrypt = true 
   }
 }
 
@@ -42,10 +42,10 @@ module "output_kinesis_stream" {
 }
 
 # s3 model bucket for storing ML models
-module "s3_bucket" {
-  source = "./modules/s3"
-  bucket_name = "${var.model_bucket}-${var.project_id}"
-}
+# module "s3_bucket" {
+#   source = "./modules/s3"
+#   bucket_name = "${var.model_bucket}-${var.project_id}"
+# }
 
 # ECR image registry for Lambda container
 module "ecr_image" {
@@ -62,7 +62,7 @@ module "lambda_function" {
   source = "./modules/lambda"
   image_uri = module.ecr_image.image_uri
   lambda_function_name = "${var.lambda_function_name}_${var.project_id}"
-  model_bucket = module.s3_bucket.name
+  model_bucket = var.model_bucket
   output_stream_name = "${var.output_stream_name}-${var.project_id}"
   output_stream_arn = module.output_kinesis_stream.stream_arn
   source_stream_name = "${var.source_stream_name}-${var.project_id}"
@@ -75,7 +75,7 @@ output "lambda_function" {
 }
 
 output "model_bucket" {
-  value = module.s3_bucket.name
+  value = var.model_bucket
 }
 
 output "predictions_stream_name" {
