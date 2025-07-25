@@ -14,7 +14,7 @@ RUN pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 # Copy directories into the Lambda task root
 COPY terraform/ ${LAMBDA_TASK_ROOT}/terraform/
 COPY src/ ${LAMBDA_TASK_ROOT}/src/
-COPY .env.dev ${LAMBDA_TASK_ROOT}/.env.dev
+COPY ../.env.dev ${LAMBDA_TASK_ROOT}/.env.dev
 COPY tests/ ${LAMBDA_TASK_ROOT}/tests/
 COPY tests/integration/ ${LAMBDA_TASK_ROOT}/tests/integration/
 
