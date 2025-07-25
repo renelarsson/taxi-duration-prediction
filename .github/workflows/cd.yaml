@@ -1,6 +1,5 @@
-# .github/workflows/cd.yaml 
 # Continuous Deployment workflow for taxi duration prediction
-# Environment separation: Uses .env.dev for development (mlflow-models-rll), .env.prod for production (mlflow-models-rll-mlops-capstone)
+# Environment separation: Uses .env.dev and .env.prod created from GitHub Actions secrets
 # MODEL_BUCKET and related values are set via Terraform outputs and environment variables
 
 name: CD-Deploy 
@@ -13,20 +12,24 @@ jobs:
   build-push-deploy:
     runs-on: ubuntu-latest
     steps:
+      # Checkout repository
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
+      # Configure AWS credentials from GitHub Actions secrets
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "eu-north-1"
 
+      # Setup Terraform
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
 
+      # Terraform plan
       - name: TF plan
         id: tf-plan
         working-directory: terraform   
@@ -34,6 +37,7 @@ jobs:
           terraform init -backend-config="key=mlops-capstone-prod.tfstate" -reconfigure
           terraform plan -var-file=vars/prod.tfvars
 
+      # Terraform apply
       - name: TF Apply
         id: tf-apply
         working-directory: terraform
@@ -45,10 +49,26 @@ jobs:
           echo "::set-output name=model_bucket::$(terraform output model_bucket | xargs)"
           echo "::set-output name=lambda_function::$(terraform output lambda_function | xargs)"
 
+      # Login to Amazon ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      # Create .env.dev from GitHub Actions secrets
+      - name: Create .env.dev
+        run: |
+          echo "MODEL_BUCKET=${{ secrets.DEV_MODEL_BUCKET }}" > .env.dev
+          echo "MLFLOW_EXPERIMENT_ID=${{ secrets.DEV_MLFLOW_EXPERIMENT_ID }}" >> .env.dev
+          # Add other required dev env vars as secrets and here
+
+      # Create .env.prod from GitHub Actions secrets
+      - name: Create .env.prod
+        run: |
+          echo "MODEL_BUCKET=${{ secrets.PROD_MODEL_BUCKET }}" > .env.prod
+          echo "MLFLOW_EXPERIMENT_ID=${{ secrets.PROD_MLFLOW_EXPERIMENT_ID }}" >> .env.prod
+          # Add other required prod env vars as secrets and here
+
+      # Build, tag, and push image to Amazon ECR
       - name: Build, tag, and push image to Amazon ECR
         id: build-image-step
         working-directory: .
@@ -61,12 +81,11 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image_uri::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
+      # Get model artifacts
       - name: Get model artifacts
         id: get-model-artifacts
         env:
-          # For dev, use: mlflow-models-rll (.env.dev)
-          # For prod, use: mlflow-models-rll-mlops-capstone (.env.prod, prod.tfvars) 
-          MODEL_BUCKET_DEV: "mlflow-models-rll"
+          MODEL_BUCKET_DEV: ${{ secrets.DEV_MODEL_BUCKET }}
           MODEL_BUCKET_PROD: ${{ steps.tf-apply.outputs.model_bucket }}
         run: |
           export LATEST_KEY=$(aws s3api list-objects-v2 --bucket ${MODEL_BUCKET_DEV} \
@@ -82,6 +101,7 @@ jobs:
           aws s3 sync s3://${MODEL_BUCKET_DEV} s3://${MODEL_BUCKET_PROD}
           echo "run_id=${RUN_ID}" >> $GITHUB_OUTPUT
 
+      # Update Lambda environment variables
       - name: Update Lambda
         env:
           LAMBDA_FUNCTION: ${{ steps.tf-apply.outputs.lambda_function }}
