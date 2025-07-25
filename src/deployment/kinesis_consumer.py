@@ -1,4 +1,4 @@
-# src/deployment/kinesis_consumer.py
+# src/deployment/kinesis_consumer.py 
 # Simple Kinesis consumer for streaming - adapted for real-time consumption.
 # Environment separation: Uses .env.dev for development, .env.prod for production.
 # All stream names, endpoints, and related values are loaded from environment variables for flexibility.

@@ -7,8 +7,8 @@ htmlcov/
 *.tfstate.*
 myenv/
 venv/
-.env.prod
-.env.dev
+#.env.prod
+#.env.dev
 .vscode
 .DS_Store
 mlruns/
