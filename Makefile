@@ -1,5 +1,5 @@
 # Makefile for Taxi Duration Prediction MLOps Project
-# This Makefile automates environment setup, testing, Docker builds, and cleanup.
+# Automates environment setup, testing, Docker builds, and cleanup.
 # The 'full-test' target runs the entire workflow: starts services, trains the model,
 # runs unit/integration tests, saves results, shuts down containers, and cleans up data.
 
@@ -56,13 +56,16 @@ full-test:
 	@echo "Activating environment and starting services..."
 	conda run -n myenv docker-compose --env-file .env.dev -f docker-compose.local.yaml up -d
 	sleep 5
+	# Ensure S3 bucket and Kinesis stream exist in LocalStack before tests
 	aws --endpoint-url=http://localhost:4566 s3 mb s3://rll-models-dev --region eu-north-1 || true
+	aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_predictions --shard-count 1 || true
 	@echo "Training model..."
 	conda run -n myenv docker exec taxi-duration-prediction-backend-1 bash -c "set -a; source /var/task/.env.dev; set +a; python -m src.models.train"
 	@echo "Running unit tests..."
 	conda run -n myenv docker exec taxi-duration-prediction-backend-1 pytest /var/task/tests/unit | tee unit-test-results.txt
 	@echo "Running integration tests..."
-	conda run -n myenv docker exec taxi-duration-prediction-backend-1 pytest /var/task/tests/integration | tee integration-test-results.txt
+	# Run pytest from /var/task/tests/integration so event.json is found
+	conda run -n myenv docker exec taxi-duration-prediction-backend-1 bash -c "cd /var/task/tests/integration && pytest ." | tee integration-test-results.txt
 	@echo "Shutting down containers..."
 	conda run -n myenv docker-compose --env-file .env.dev -f docker-compose.local.yaml down
 	@echo "Cleaning up LocalStack data directories..."

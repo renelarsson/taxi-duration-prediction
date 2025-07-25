@@ -4,27 +4,27 @@ rootdir: /var/task/tests/integration
 plugins: Faker-37.4.2, anyio-4.9.0
 collected 10 items
 
-../var/task/tests/integration/test_pipeline_e2e.py ..                    [ 20%]
-../var/task/tests/integration/test_workflow.py ssss.s.s                  [100%]
+test_pipeline_e2e.py ..                                                  [ 20%]
+test_workflow.py ssss.s.s                                                [100%]
 
 =============================== warnings summary ===============================
-../var/task/tests/integration/test_pipeline_e2e.py:54
+test_pipeline_e2e.py:54
   /var/task/tests/integration/test_pipeline_e2e.py:54: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.integration
 
-../var/task/tests/integration/test_workflow.py:74
+test_workflow.py:74
   /var/task/tests/integration/test_workflow.py:74: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.integration
 
-../var/task/tests/integration/test_workflow.py:82
+test_workflow.py:82
   /var/task/tests/integration/test_workflow.py:82: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.integration
 
-../var/task/tests/integration/test_workflow.py:90
+test_workflow.py:90
   /var/task/tests/integration/test_workflow.py:90: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.integration
 
-../var/task/tests/integration/test_workflow.py:180
+test_workflow.py:180
   /var/task/tests/integration/test_workflow.py:180: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.slow
 
@@ -37,5 +37,5 @@ test_workflow.py::test_evidently_monitoring_workflow
     from scipy.linalg.basic import LinAlgError
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-================== 4 passed, 6 skipped, 7 warnings in 24.55s ===================
+================== 4 passed, 6 skipped, 7 warnings in 32.19s ===================
 

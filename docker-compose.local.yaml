@@ -25,10 +25,13 @@ services:
       - "./model:/app/model"
       - "./.env.dev:/app/.env.dev"
       - "./.env.dev:/var/task/.env.dev"
+      # Mount event.json to both possible paths used by tests
+      - "./tests/integration/event.json:/var/task/tests/integration/event.json"
+      - "./tests/integration/event.json:/var/task/integration-test/event.json"
     depends_on:
       - localstack
-      - mlflow   
-  
+      - mlflow
+
   localstack:
     image: localstack/localstack
     ports:
@@ -37,8 +40,6 @@ services:
       SERVICES: kinesis,s3,lambda
       DEFAULT_REGION: ${AWS_REGION}
       DATA_DIR: /tmp/localstack/data
-  #volumes: # Was commented, given localstack couldn't be created
-  #- ./localstack-data-new:/tmp/localstack/data
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
@@ -48,14 +49,4 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
-    command: /bin/sh -c "pip install boto3 && mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root s3://${MODEL_BUCKET}/ --host 0.0.0.0 --port 5000"    #entrypoint: /bin/sh -c "pip install boto3 && mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root s3://${MODEL_BUCKET}/ --host 0.0.0.0 --port 5000"
-#  kinesis:
-#    image: localstack/localstack
-#    ports:
-#      - "4567:4566"
-#    environment:
-#      SERVICES: kinesis
-#      DEFAULT_REGION: ${AWS_REGION}
-#    command: ["localstack", "start", "-d"]
-#volumes:
-#  localstack-data:
+    command: /bin/sh -c "pip install boto3 && mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root s3://${MODEL_BUCKET}/ --host 0.0.0.0 --port 5000"
