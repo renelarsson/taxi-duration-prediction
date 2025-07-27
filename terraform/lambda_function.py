@@ -1,7 +1,6 @@
 """
 Lambda entrypoint for streaming inference.
 Loads ModelService with model and DictVectorizer from MLflow artifacts.
-
 - Returns "predictions" key for local tests (TEST_RUN=True)
 - Returns "body" key for AWS deployment (TEST_RUN=False)
 """
