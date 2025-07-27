@@ -3,6 +3,9 @@
 # Python bytecode cache (should be in .gitignore)
 __pycache__/
 *.pyc
+*.zip 
+dist/
+sam-installation/
 
 # Pytest and coverage
 .pytest_cache/

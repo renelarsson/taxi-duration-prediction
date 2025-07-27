@@ -1,5 +1,5 @@
 # template.yaml - AWS SAM template for taxi duration prediction application
-# Environment separation:
+# Environment separation: 
 #   - For development, use .env.dev (MODEL_BUCKET: rll-models-dev)
 #   - For production, use .env.prod (MODEL_BUCKET: rll-models-prod)
 # MODEL_BUCKET and related values are set via Parameters and environment variables for flexibility.
@@ -26,13 +26,11 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      ImageUri: stream-model-duration:latest
-      Timeout: 10
+      ImageUri: 887329216606.dkr.ecr.eu-north-1.amazonaws.com/taxi-duration-lambda:v2
+      Timeout: 30
+      MemorySize: 256 # Changed from 128 to 256 for better performance
       Environment:
         Variables:
-          # MODEL_BUCKET is set from the ModelBucket parameter above.
-          # This allows you to switch between dev and prod buckets at deploy time
-          # by passing a different value for ModelBucket (e.g., via --parameter-overrides).
           MODEL_BUCKET: !Ref ModelBucket
           RUN_ID: !Ref RunId
           PREDICTIONS_STREAM_NAME: !Ref PredictionsStreamName

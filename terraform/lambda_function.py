@@ -3,6 +3,8 @@ Lambda entrypoint for streaming inference.
 Loads ModelService with model and DictVectorizer from MLflow artifacts.
 """
 import os
+import base64
+import logging
 import terraform.model as model
 
 def get_run_id(env_path="/var/task/.env.dev"):
@@ -16,7 +18,7 @@ def get_run_id(env_path="/var/task/.env.dev"):
 
 RUN_ID, TEST_RUN = get_run_id()
 
-PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions')
+PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'prod_taxi_predictions') # Use 'ride_predictions' in AWS CLI for LocalStack
 
 print("DEBUG RUN_ID:", RUN_ID)
 print("DEBUG TEST_RUN:", TEST_RUN)
@@ -37,4 +39,25 @@ else:
     )
 
 def lambda_handler(event, context):
-    return model_service.lambda_handler(event)
+    print("EVENT RECEIVED:", event)
+    try:
+        logging.info("Received event: %s", event)
+        results = []
+        for record in event["Records"]:
+            encoded_data = record["kinesis"]["data"]
+            try:
+                decoded_data = base64.b64decode(encoded_data).decode("utf-8")
+                results.append(decoded_data)
+            except Exception as e:
+                logging.error("Base64 decode error: %s", e)
+                results.append(f"Base64 decode error: {str(e)}")
+        return {
+            "statusCode": 200,
+            "body": results
+        }
+    except Exception as e:
+        logging.error("Unhandled exception: %s", e)
+        return {
+            "statusCode": 500,
+            "body": f"Unhandled exception: {str(e)}"
+        }
