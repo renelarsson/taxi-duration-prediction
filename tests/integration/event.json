@@ -14,7 +14,7 @@
          "eventName": "aws:kinesis:record",
          "invokeIdentityArn": "arn:aws:iam::387546586013:role/lambda-kinesis-role",
          "awsRegion": "eu-north-1",
-         "eventSourceARN": "arn:aws:kinesis:eu-north-1:387546586013:stream/prod_taxi_predictions"
+         "eventSourceARN": "arn:aws:kinesis:eu-north-1:387546586013:stream/ride_events"
       }
    ]
 }

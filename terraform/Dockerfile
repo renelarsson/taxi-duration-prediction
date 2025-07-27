@@ -22,6 +22,7 @@ COPY .env.prod ${LAMBDA_TASK_ROOT}/.env.prod
 COPY tests/ ${LAMBDA_TASK_ROOT}/tests/ 
 # Comment out for SAM/deployment
 COPY tests/integration/ ${LAMBDA_TASK_ROOT}/tests/integration/ 
+COPY tests/integration/event.json ${LAMBDA_TASK_ROOT}/tests/integration/event.json
 
 # Set PYTHONPATH so Python can find the src package
 ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
