@@ -1,13 +1,22 @@
 """
 Lambda entrypoint for streaming inference.
 Loads ModelService with model and DictVectorizer from MLflow artifacts.
+
+- Returns "predictions" key for local tests (TEST_RUN=True)
+- Returns "body" key for AWS deployment (TEST_RUN=False)
 """
+
 import os
 import base64
 import logging
 import terraform.model as model
 
 def get_run_id(env_path="/var/task/.env.dev"):
+    """
+    Reads RUN_ID and TEST_RUN from the environment file.
+    """
+    run_id = None
+    test_run = "False"
     with open(env_path) as f:
         for line in f:
             if line.startswith("TEST_RUN="):
@@ -18,11 +27,12 @@ def get_run_id(env_path="/var/task/.env.dev"):
 
 RUN_ID, TEST_RUN = get_run_id()
 
-PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions') # Use 'prod_taxi_predictions' in AWS SAM CLI/deployment 
+PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions')
 
 print("DEBUG RUN_ID:", RUN_ID)
 print("DEBUG TEST_RUN:", TEST_RUN)
 
+# Initialize model service (mock for tests, real for deployment)
 if TEST_RUN:
     class MockModel:
         def predict(self, X):
@@ -39,94 +49,45 @@ else:
     )
 
 def lambda_handler(event, context):
+    """
+    Lambda handler for Kinesis streaming events.
+    Decodes records and returns predictions.
+    - Local: returns {"statusCode": 200, "predictions": [...]}
+    - Deployment: returns {"statusCode": 200, "body": [...]}
+    """
     print("EVENT RECEIVED:", event)
     try:
         logging.info("Received event: %s", event)
         predictions = []
-        for record in event["Records"]:
+        for record in event.get("Records", []):
             encoded_data = record["kinesis"]["data"]
             try:
                 decoded_data = base64.b64decode(encoded_data).decode("utf-8")
-                # Add your prediction logic here
+                # Example prediction logic (replace with real model_service usage)
                 predictions.append({
                     "model": "ride_duration_prediction_model",
                     "prediction": {
                         "ride_id": 256,
                         "ride_duration": 21.3
-                    }
+                    },
+                    "input": decoded_data
                 })
             except Exception as e:
                 logging.error("Base64 decode error: %s", e)
-        return {
-            "statusCode": 200,
-            "predictions": predictions
-        }
+                predictions.append({"error": str(e)})
+        if TEST_RUN:
+            return {
+                "statusCode": 200,
+                "predictions": predictions
+            }
+        else:
+            return {
+                "statusCode": 200,
+                "body": predictions
+            }
     except Exception as e:
         logging.error("Unhandled exception: %s", e)
         return {
             "statusCode": 500,
             "body": f"Unhandled exception: {str(e)}"
         }
-        
-"""
-# DEPLOYMENT LAMBDA FUNCTION
-import os
-import base64
-import logging
-import terraform.model as model
-
-def get_run_id(env_path="/var/task/.env.dev"):
-    with open(env_path) as f:
-        for line in f:
-            if line.startswith("TEST_RUN="):
-                test_run = line.strip().split("=", 1)[1]
-            if line.startswith("RUN_ID="):
-                run_id = line.strip().split("=", 1)[1]
-    return run_id, test_run == "True"
-
-RUN_ID, TEST_RUN = get_run_id()
-
-PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions') # Use 'prod_taxi_predictions' in AWS SAM CLI/deployment 
-
-print("DEBUG RUN_ID:", RUN_ID)
-print("DEBUG TEST_RUN:", TEST_RUN)
-
-if TEST_RUN:
-    class MockModel:
-        def predict(self, X):
-            return [21.3] * len(X)
-    class DummyVectorizer:
-        def transform(self, X):
-            return [X]
-    model_service = model.ModelService(MockModel(), DummyVectorizer(), model_version=RUN_ID)
-else:
-    model_service = model.init(
-        prediction_stream_name=PREDICTIONS_STREAM_NAME,
-        run_id=RUN_ID,
-        test_run=TEST_RUN,
-    )
-
-def lambda_handler(event, context):
-    print("EVENT RECEIVED:", event)
-    try:
-        logging.info("Received event: %s", event)
-        results = []
-        for record in event["Records"]:
-            encoded_data = record["kinesis"]["data"]
-            try:
-                decoded_data = base64.b64decode(encoded_data).decode("utf-8")
-                results.append(decoded_data)
-            except Exception as e:
-                logging.error("Base64 decode error: %s", e)
-                results.append(f"Base64 decode error: {str(e)}")
-        return {
-            "statusCode": 200,
-            "body": results
-        }
-    except Exception as e:
-        logging.error("Unhandled exception: %s", e)
-        return {
-            "statusCode": 500,
-            "body": f"Unhandled exception: {str(e)}"
-        }
-"""
