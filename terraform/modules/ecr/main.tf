@@ -13,10 +13,10 @@ resource "aws_ecr_repository" "repo" {
 # Build and push the Docker image to ECR using local-exec provisioner
 # NOTE: The Docker build context is set to the project root so all files are available.
 resource "null_resource" "ecr_image" {
-  triggers = {
-    python_file = md5(file(var.lambda_function_local_path))
-    docker_file = md5(file(var.docker_image_local_path))
-  }
+#  triggers = {
+#    python_file = md5(file(var.lambda_function_local_path))
+#    docker_file = md5(file(var.docker_image_local_path))
+#  }
 
   provisioner "local-exec" {
     command = <<EOF
