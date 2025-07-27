@@ -68,8 +68,8 @@ def lambda_handler(event, context):
             "body": f"Unhandled exception: {str(e)}"
         }
         
-# DEPLOYMENT LAMBDA FUNCTION
 """
+# DEPLOYMENT LAMBDA FUNCTION
 import os
 import base64
 import logging
