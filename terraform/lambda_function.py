@@ -18,7 +18,7 @@ def get_run_id(env_path="/var/task/.env.dev"):
 
 RUN_ID, TEST_RUN = get_run_id()
 
-PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'prod_taxi_predictions') # Use 'ride_predictions' in AWS CLI for LocalStack
+PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions') # Use 'prod_taxi_predictions' in AWS CLI for LocalStack
 
 print("DEBUG RUN_ID:", RUN_ID)
 print("DEBUG TEST_RUN:", TEST_RUN)
