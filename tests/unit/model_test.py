@@ -1,13 +1,17 @@
 """Unit tests for taxi duration prediction project.
 Based on MLOps Zoomcamp Module 6 patterns.
 """
+
 from pathlib import Path
+
 import terraform.model as model
+
 
 def read_text(file):
     test_directory = Path(__file__).parent.parent
     with open(test_directory / file, 'rt', encoding='utf-8') as f_in:
         return f_in.read().strip()
+
 
 def test_base64_decode():
     base64_input = read_text('data.b64')
@@ -22,9 +26,11 @@ def test_base64_decode():
     }
     assert actual_result == expected_result
 
+
 class DummyVectorizer:
     def transform(self, X):
         return [X]
+
 
 def test_prepare_features():
     model_service = model.ModelService(None, DummyVectorizer())
@@ -40,12 +46,15 @@ def test_prepare_features():
     }
     assert actual_features == expected_features
 
+
 class ModelMock:
     def __init__(self, value):
         self.value = value
+
     def predict(self, X):
         n = len(X)
         return [self.value] * n
+
 
 def test_predict():
     model_mock = ModelMock(10.0)
@@ -57,6 +66,7 @@ def test_predict():
     actual_prediction = model_service.predict(features)
     expected_prediction = 10.0
     assert actual_prediction == expected_prediction
+
 
 def test_lambda_handler():
     model_mock = ModelMock(10.0)

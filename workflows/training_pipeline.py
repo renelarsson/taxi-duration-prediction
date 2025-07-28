@@ -3,22 +3,24 @@
 
 import os
 import sys
-import pathlib
 import pickle
-import pandas as pd
+import pathlib
+from datetime import date
+
 import numpy as np
 import scipy
-import sklearn
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.metrics import mean_squared_error
 import mlflow
+import pandas as pd
+import sklearn
 import xgboost as xgb
 from prefect import flow, task
+from sklearn.metrics import mean_squared_error
 from prefect.artifacts import create_markdown_artifact
-from datetime import date
+from sklearn.feature_extraction import DictVectorizer
 
 # Add src to path for organized imports
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 @task(retries=3, retry_delay_seconds=2)
 def read_data(filename: str) -> pd.DataFrame:
@@ -38,10 +40,9 @@ def read_data(filename: str) -> pd.DataFrame:
 
     return df
 
+
 @task
-def add_features(
-    df_train: pd.DataFrame, df_val: pd.DataFrame
-) -> tuple[
+def add_features(df_train: pd.DataFrame, df_val: pd.DataFrame) -> tuple[
     scipy.sparse._csr.csr_matrix,
     scipy.sparse._csr.csr_matrix,
     np.ndarray,
@@ -66,6 +67,7 @@ def add_features(
     y_train = df_train["duration"].values
     y_val = df_val["duration"].values
     return X_train, X_val, y_train, y_val, dv
+
 
 @task(log_prints=True)
 def train_best_model(
@@ -118,7 +120,7 @@ def train_best_model(
 
         ## Summary
 
-        Duration Prediction 
+        Duration Prediction
 
         ## RMSE XGBoost Model
 
@@ -133,6 +135,7 @@ def train_best_model(
 
     return None
 
+
 @flow
 def main_flow(
     train_path: str = "./data/yellow_tripdata_2023-01.parquet",
@@ -142,6 +145,7 @@ def main_flow(
 
     # MLflow settings
     import os
+
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
     # Set MLflow S3 endpoint if provided
     s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
@@ -159,6 +163,7 @@ def main_flow(
     # Train
     train_best_model(X_train, X_val, y_train, y_val, dv)
 
+
 @flow
 def training_pipeline(
     year: int = 2023,
@@ -166,24 +171,23 @@ def training_pipeline(
     val_month: int = 2,
 ) -> None:
     """Training pipeline with configurable months"""
-    
+
     train_path = f"./data/yellow_tripdata_{year}-{train_month:02d}.parquet"
     val_path = f"./data/yellow_tripdata_{year}-{val_month:02d}.parquet"
-    
+
     main_flow(train_path, val_path)
+
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Training pipeline')
     parser.add_argument('--year', type=int, default=2023, help='Data year')
     parser.add_argument('--train-month', type=int, default=1, help='Training month')
     parser.add_argument('--val-month', type=int, default=2, help='Validation month')
-    
+
     args = parser.parse_args()
-    
+
     training_pipeline(
-        year=args.year,
-        train_month=args.train_month,
-        val_month=args.val_month
+        year=args.year, train_month=args.train_month, val_month=args.val_month
     )

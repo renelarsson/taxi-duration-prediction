@@ -4,18 +4,20 @@ Based on MLOps Zoomcamp Module 6 test_kinesis.py patterns.
 """
 
 import os
-import json
 import sys
+import json
 import time
-import pytest
-import boto3
 from pprint import pprint
-from deepdiff import DeepDiff
 from pathlib import Path
+
+import boto3
+import pytest
+from deepdiff import DeepDiff
 
 # Add src to path for testing
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.append(str(PROJECT_ROOT / "src"))
+
 
 def get_run_id(env_path="/var/task/.env.dev"):
     with open(env_path) as f:
@@ -24,11 +26,13 @@ def get_run_id(env_path="/var/task/.env.dev"):
                 return line.strip().split("=", 1)[1]
     raise ValueError("RUN_ID not found in .env.dev")
 
+
 # DummyVectorizer for testing ModelService without real DictVectorizer
 class DummyVectorizer:
     def transform(self, X):
         # Returns input as a list, mimicking DictVectorizer interface
         return [X]
+
 
 def test_kinesis_stream_integration():
     """
@@ -71,21 +75,28 @@ def test_kinesis_stream_integration():
     except Exception as e:
         pytest.skip(f"Kinesis integration not available: {e}")
 
+
 @pytest.mark.integration
 def test_prefect_training_workflow():
     """
     Test Prefect training workflow integration.
     Validates workflow execution and task dependencies.
     """
-    pytest.skip("Prefect training workflow test - implement based on your Prefect setup")
+    pytest.skip(
+        "Prefect training workflow test - implement based on your Prefect setup"
+    )
 
-@pytest.mark.integration  
+
+@pytest.mark.integration
 def test_prefect_inference_workflow():
     """
     Test Prefect inference workflow integration.
     Validates batch inference workflow execution.
     """
-    pytest.skip("Prefect inference workflow test - implement based on your Prefect setup")
+    pytest.skip(
+        "Prefect inference workflow test - implement based on your Prefect setup"
+    )
+
 
 @pytest.mark.integration
 def test_prefect_monitoring_workflow():
@@ -93,7 +104,10 @@ def test_prefect_monitoring_workflow():
     Test Prefect monitoring workflow integration.
     Validates monitoring workflow execution and metrics storage.
     """
-    pytest.skip("Prefect monitoring workflow test - implement based on your Prefect setup")
+    pytest.skip(
+        "Prefect monitoring workflow test - implement based on your Prefect setup"
+    )
+
 
 def test_mlflow_workflow_integration():
     """
@@ -101,16 +115,21 @@ def test_mlflow_workflow_integration():
     Validates model logging, loading, and version management.
     """
     try:
-        import mlflow
         from unittest.mock import Mock, patch
-        with patch('mlflow.start_run'), \
-             patch('mlflow.log_params'), \
-             patch('mlflow.log_metric'), \
-             patch('mlflow.log_artifact'), \
-             patch('mlflow.sklearn.log_model'):
+
+        import mlflow
+
+        with (
+            patch('mlflow.start_run'),
+            patch('mlflow.log_params'),
+            patch('mlflow.log_metric'),
+            patch('mlflow.log_artifact'),
+            patch('mlflow.sklearn.log_model'),
+        ):
             pass
     except ImportError:
         pytest.skip("MLflow not available for workflow testing")
+
 
 def test_evidently_monitoring_workflow():
     """
@@ -118,17 +137,16 @@ def test_evidently_monitoring_workflow():
     Validates drift detection and metrics calculation workflow.
     """
     try:
+        import pandas as pd
         from evidently import Report
         from evidently.metrics import ValueDrift
-        import pandas as pd
-        reference_data = pd.DataFrame({
-            'feature1': [1, 2, 3, 4, 5],
-            'prediction': [10, 20, 30, 40, 50]
-        })
-        current_data = pd.DataFrame({
-            'feature1': [1, 2, 3, 4, 5],
-            'prediction': [12, 22, 32, 42, 52]
-        })
+
+        reference_data = pd.DataFrame(
+            {'feature1': [1, 2, 3, 4, 5], 'prediction': [10, 20, 30, 40, 50]}
+        )
+        current_data = pd.DataFrame(
+            {'feature1': [1, 2, 3, 4, 5], 'prediction': [12, 22, 32, 42, 52]}
+        )
         report = Report(metrics=[ValueDrift(column='prediction')])
         report.run(reference_data=reference_data, current_data=current_data)
         result = report.as_dict()
@@ -136,6 +154,7 @@ def test_evidently_monitoring_workflow():
         assert len(result['metrics']) > 0
     except ImportError:
         pytest.skip("Evidently not available for workflow testing")
+
 
 def test_lambda_kinesis_workflow():
     """
@@ -177,6 +196,7 @@ def test_lambda_kinesis_workflow():
     assert 'type_changes' not in diff
     assert 'values_changed' not in diff
 
+
 @pytest.mark.slow
 def test_end_to_end_workflow():
     """
@@ -184,6 +204,7 @@ def test_end_to_end_workflow():
     Validates: Data → Training → Inference → Monitoring workflow.
     """
     pytest.skip("End-to-end workflow test - implement based on your complete setup")
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "-m", "not slow"])

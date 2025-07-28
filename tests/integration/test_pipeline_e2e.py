@@ -1,15 +1,18 @@
 """
 End-to-end pipeline integration tests for streaming inference.
 """
+
 import sys
 import json
+from pathlib import Path
+
 import pytest
 import requests
 from deepdiff import DeepDiff
-from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.append(str(PROJECT_ROOT / "src"))
+
 
 def get_run_id(env_path="/var/task/.env.dev"):
     with open(env_path) as f:
@@ -18,10 +21,12 @@ def get_run_id(env_path="/var/task/.env.dev"):
                 return line.strip().split("=", 1)[1]
     raise ValueError("RUN_ID not found in .env.dev")
 
+
 def load_test_event():
     event_path = PROJECT_ROOT / "integration-test" / "event.json"
     with open(event_path, 'rt', encoding='utf-8') as f_in:
         return json.load(f_in)
+
 
 def test_lambda_docker_integration():
     event = load_test_event()
@@ -51,15 +56,19 @@ def test_lambda_docker_integration():
     except requests.exceptions.RequestException as e:
         pytest.skip(f"Lambda container not available: {e}")
 
+
 @pytest.mark.integration
 def test_model_service_integration():
     from terraform.model import ModelService
+
     class MockModel:
         def predict(self, X):
             return [21.3] * len(X)
+
     class DummyVectorizer:
         def transform(self, X):
             return [X]
+
     run_id = get_run_id()
     model_service = ModelService(MockModel(), DummyVectorizer(), model_version=run_id)
     ride_data = {

@@ -1,5 +1,5 @@
 # scripts/publish.sh
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 # Docker image publishing script for taxi duration prediction
 # Based on MLOps Zoomcamp Module 6 publish patterns (app. 70 files for complete MLOps system)
 
@@ -58,7 +58,7 @@ if aws ecr describe-repositories --repository-names ${ECR_REPO_NAME} --region ${
 else
     echo "Creating ECR repository ${ECR_REPO_NAME}..."
     aws ecr create-repository --repository-name ${ECR_REPO_NAME} --region ${AWS_REGION}
-    
+
     if [ $? -eq 0 ]; then
         echo "ECR repository created successfully"
     else

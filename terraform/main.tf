@@ -7,7 +7,7 @@ terraform {
     bucket  = "rll-models-dev"
     key     = "mlops-capstone-prod.tfstate"
     region  = "eu-north-1"
-    encrypt = true 
+    encrypt = true
   }
 }
 

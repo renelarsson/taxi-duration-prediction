@@ -1,5 +1,5 @@
 # template.yaml - AWS SAM template for taxi duration prediction application
-# Environment separation: 
+# Environment separation:
 #   - For development, use .env.dev (MODEL_BUCKET: rll-models-dev)
 #   - For production, use .env.prod (MODEL_BUCKET: rll-models-prod)
 # MODEL_BUCKET and related values are set via Parameters and environment variables for flexibility.

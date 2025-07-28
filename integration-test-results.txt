@@ -32,5 +32,4 @@ test_workflow.py::test_evidently_monitoring_workflow
     from scipy.linalg.basic import LinAlgError
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-================== 4 passed, 6 skipped, 7 warnings in 17.41s ===================
-
+================== 4 passed, 6 skipped, 7 warnings in 13.41s ===================

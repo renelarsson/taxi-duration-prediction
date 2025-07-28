@@ -48,7 +48,9 @@ for root, dirs, files in os.walk(PROJECT_ROOT):
                         env_var_usage[var] = True
                 # Check for hardcoded values (simple heuristic)
                 for line in content.splitlines():
-                    if re.match(r'.*=\s*[\'"].+[\'"]', line) and not any(var in line for var in env_vars):
+                    if re.match(r'.*=\s*[\'"].+[\'"]', line) and not any(
+                        var in line for var in env_vars
+                    ):
                         hardcoded_candidates.append((path, line.strip()))
 
 # Print results

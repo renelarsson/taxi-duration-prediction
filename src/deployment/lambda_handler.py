@@ -1,49 +1,64 @@
-# src/deployment/lambda_handler.py 
+# src/deployment/lambda_handler.py
 # Lambda handler for deployment - organized structure version.
 # Environment separation: Uses .env.dev for development (rll-models-dev), .env.prod for production (rll-models-prod)
 # MODEL_BUCKET and related values are loaded from environment variables for flexibility.
 
 import os
-import json
-import boto3
-import base64
 import sys
+import json
+import base64
 import logging
-from typing import Dict, List, Any
-from models.predict import predict_single_trip, load_model, load_preprocessor
+from typing import Any, Dict, List
+
+import boto3
+
+from models.predict import load_model, load_preprocessor, predict_single_trip
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+
 class LambdaHandler:
     """
     Lambda deployment handler. Handles Kinesis events and model predictions.
     Uses environment variables for bucket and stream separation.
     """
+
     def __init__(self):
         """Initialize handler"""
-        self.predictions_stream_name = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions')
+        self.predictions_stream_name = os.getenv(
+            'PREDICTIONS_STREAM_NAME', 'ride_predictions'
+        )
         self.run_id = os.getenv('RUN_ID')
         self.test_run = os.getenv('TEST_RUN', 'False') == 'True'
         self.model_bucket = os.getenv('MODEL_BUCKET', 'rll-models-dev')
 
-        self.kinesis_client = boto3.client('kinesis', endpoint_url=os.getenv('KINESIS_ENDPOINT_URL'))
-        self.s3_client = boto3.client('s3', endpoint_url=os.getenv('MLFLOW_S3_ENDPOINT_URL'))
-        
+        self.kinesis_client = boto3.client(
+            'kinesis', endpoint_url=os.getenv('KINESIS_ENDPOINT_URL')
+        )
+        self.s3_client = boto3.client(
+            's3', endpoint_url=os.getenv('MLFLOW_S3_ENDPOINT_URL')
+        )
+
         self.model = None
         self.dv = None
         self._load_model_artifacts()
 
-        logger.info(f"LambdaHandler initialized - test_run: {self.test_run}, model_bucket: {self.model_bucket}")
+        logger.info(
+            f"LambdaHandler initialized - test_run: {self.test_run}, model_bucket: {self.model_bucket}"
+        )
 
     def _load_model_artifacts(self):
         """Load model and preprocessor"""
         try:
             if self.run_id:
                 import mlflow
-                logged_model = f's3://{self.model_bucket}/1/{self.run_id}/artifacts/model'
+
+                logged_model = (
+                    f's3://{self.model_bucket}/1/{self.run_id}/artifacts/model'
+                )
                 s3_endpoint = os.getenv("MLFLOW_S3_ENDPOINT_URL")
                 if s3_endpoint:
                     os.environ["MLFLOW_S3_ENDPOINT_URL"] = s3_endpoint
@@ -60,11 +75,17 @@ class LambdaHandler:
                     s3_key = f"1/{self.run_id}/artifacts/models/dv.bin"
                     try:
                         os.makedirs('models', exist_ok=True)
-                        self.s3_client.download_file(self.model_bucket, s3_key, dv_local_path)
+                        self.s3_client.download_file(
+                            self.model_bucket, s3_key, dv_local_path
+                        )
                         self.dv = load_preprocessor(dv_local_path)
-                        logger.info(f"Downloaded and loaded preprocessor from S3: {s3_key}")
+                        logger.info(
+                            f"Downloaded and loaded preprocessor from S3: {s3_key}"
+                        )
                     except Exception as e:
-                        logger.warning(f"Could not load preprocessor from S3 ({s3_key}): {e}")
+                        logger.warning(
+                            f"Could not load preprocessor from S3 ({s3_key}): {e}"
+                        )
                         self.dv = None
             else:
                 self.model = load_model('models/model.bin')
@@ -92,6 +113,7 @@ class LambdaHandler:
         try:
             if hasattr(self.model, 'predict'):
                 import pandas as pd
+
                 df = pd.DataFrame([features])
                 pred = self.model.predict(df)
                 return float(pred[0])
@@ -117,10 +139,7 @@ class LambdaHandler:
         prediction_event = {
             'model': 'taxi_duration_prediction_model',
             'version': 'organized-v1',
-            'prediction': {
-                'ride_duration': prediction,
-                'ride_id': ride_id
-            }
+            'prediction': {'ride_duration': prediction, 'ride_id': ride_id},
         }
         return prediction_event
 
@@ -130,7 +149,7 @@ class LambdaHandler:
                 self.kinesis_client.put_record(
                     StreamName=self.predictions_stream_name,
                     Data=json.dumps(prediction_event),
-                    PartitionKey=str(ride_id)
+                    PartitionKey=str(ride_id),
                 )
                 logger.info(f"Sent prediction for ride {ride_id}")
             except Exception as e:
@@ -150,11 +169,11 @@ class LambdaHandler:
             except Exception as e:
                 logger.error(f"Failed to process record: {e}")
                 continue
-        return {
-            'predictions': predictions_events
-        }
+        return {'predictions': predictions_events}
+
 
 lambda_handler_instance = None
+
 
 def get_handler():
     global lambda_handler_instance
@@ -162,24 +181,32 @@ def get_handler():
         lambda_handler_instance = LambdaHandler()
     return lambda_handler_instance
 
+
 def lambda_handler(event, context):
     handler = get_handler()
     return handler.lambda_handler(event, context)
 
+
 if __name__ == "__main__":
     test_event = {
-        'Records': [{
-            'kinesis': {
-                'data': base64.b64encode(json.dumps({
-                    'ride': {
-                        'PULocationID': 161,
-                        'DOLocationID': 236,
-                        'trip_distance': 3.5
-                    },
-                    'ride_id': 'test_ride_123'
-                }).encode()).decode()
+        'Records': [
+            {
+                'kinesis': {
+                    'data': base64.b64encode(
+                        json.dumps(
+                            {
+                                'ride': {
+                                    'PULocationID': 161,
+                                    'DOLocationID': 236,
+                                    'trip_distance': 3.5,
+                                },
+                                'ride_id': 'test_ride_123',
+                            }
+                        ).encode()
+                    ).decode()
+                }
             }
-        }]
+        ]
     }
     os.environ['TEST_RUN'] = 'True'
     os.environ['MODEL_BUCKET'] = 'rll-models-dev'

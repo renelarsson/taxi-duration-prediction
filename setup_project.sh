@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 # =============================
 # User Settings (Change These!)
@@ -48,7 +48,7 @@ mkdir -p .vscode              # VSCode settings
 # Infrastructure (hierarchical order)
 mkdir -p infrastructure/vars   # Terraform variable files
 mkdir -p infrastructure/terraform/modules/kinesis
-mkdir -p infrastructure/terraform/modules/s3  
+mkdir -p infrastructure/terraform/modules/s3
 mkdir -p infrastructure/terraform/modules/ecr
 mkdir -p infrastructure/terraform/modules/lambda
 
@@ -99,7 +99,7 @@ model.py
 Dockerfile
 docker-compose.local.yaml
 docker-compose.aws.yaml
-docker-compose.yaml 
+docker-compose.yaml
 model/MLmodel
 model/README.txt
 model/conda.yaml

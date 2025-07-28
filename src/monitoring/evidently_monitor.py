@@ -4,20 +4,21 @@
 # All database, bucket, and endpoint values are loaded from environment variables for flexibility.
 
 import os
-import datetime
 import time
 import logging
+import argparse
+import datetime
+
+import joblib
 import pandas as pd
 import psycopg
-import argparse
-import joblib
-from prefect import task, flow
-from evidently import Report
-from evidently import DataDefinition
-from evidently import Dataset
-from evidently.metrics import ValueDrift, DriftedColumnsCount, MissingValueCount
+from prefect import flow, task
+from evidently import Report, Dataset, DataDefinition
+from evidently.metrics import ValueDrift, MissingValueCount, DriftedColumnsCount
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s"
+)
 
 # Configuration from environment (.env.dev or .env.prod)
 SEND_TIMEOUT = int(os.getenv('MONITORING_SEND_TIMEOUT', '10'))
@@ -26,11 +27,15 @@ DB_PORT = os.getenv('DB_PORT', '5432')
 DB_USER = os.getenv('DB_USER', 'postgres')
 DB_PASSWORD = os.getenv('DB_PASSWORD', 'example')
 DB_NAME = os.getenv('DB_NAME', 'test')
-MONITORING_BUCKET = os.getenv('MONITORING_BUCKET', 'taxi-monitoring-dev')  # S3 bucket for monitoring reports
+MONITORING_BUCKET = os.getenv(
+    'MONITORING_BUCKET', 'taxi-monitoring-dev'
+)  # S3 bucket for monitoring reports
 EVIDENTLY_API_URL = os.getenv('EVIDENTLY_API_URL', 'http://localhost:8085')
 
 # Database setup - configurable
-CONNECTION_STRING = f"host={DB_HOST} port={DB_PORT} user={DB_USER} password={DB_PASSWORD}"
+CONNECTION_STRING = (
+    f"host={DB_HOST} port={DB_PORT} user={DB_USER} password={DB_PASSWORD}"
+)
 CONNECTION_STRING_DB = f"{CONNECTION_STRING} dbname={DB_NAME}"
 
 create_table_statement = """
@@ -42,6 +47,7 @@ create table taxi_metrics(
     share_missing_values float
 )
 """
+
 
 def load_reference_data(reference_path: str = None):
     """
@@ -60,8 +66,11 @@ def load_reference_data(reference_path: str = None):
         return reference_data
 
     except FileNotFoundError:
-        logging.warning(f"Reference data not found at {reference_path}. Creating from historical data.")
+        logging.warning(
+            f"Reference data not found at {reference_path}. Creating from historical data."
+        )
         return create_reference_data()
+
 
 def create_reference_data():
     """
@@ -83,7 +92,10 @@ def create_reference_data():
         return reference_data
 
     except FileNotFoundError:
-        raise FileNotFoundError(f"Cannot create reference data. {reference_file} not found.")
+        raise FileNotFoundError(
+            f"Cannot create reference data. {reference_file} not found."
+        )
+
 
 def preprocess_taxi_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -95,11 +107,14 @@ def preprocess_taxi_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'])
     df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'])
-    df['duration'] = (df.tpep_dropoff_datetime - df.tpep_pickup_datetime).dt.total_seconds() / 60
+    df['duration'] = (
+        df.tpep_dropoff_datetime - df.tpep_pickup_datetime
+    ).dt.total_seconds() / 60
     df = df[(df.duration >= 1) & (df.duration <= 60)].copy()
     df['PU_DO'] = df['PULocationID'].astype(str) + '_' + df['DOLocationID'].astype(str)
     df = df[(df.passenger_count > 0) & (df.passenger_count < 8)].copy()
     return df
+
 
 def load_model(model_path: str = None):
     """
@@ -121,6 +136,7 @@ def load_model(model_path: str = None):
         logging.warning(f"Model not found at {model_path}")
         return None
 
+
 def load_data_for_date(target_date: datetime.datetime) -> pd.DataFrame:
     """
     Load data for specific day.
@@ -129,7 +145,9 @@ def load_data_for_date(target_date: datetime.datetime) -> pd.DataFrame:
     Returns:
         DataFrame for target date
     """
-    monthly_file = f'data/yellow_tripdata_{target_date.year}-{target_date.month:02d}.parquet'
+    monthly_file = (
+        f'data/yellow_tripdata_{target_date.year}-{target_date.month:02d}.parquet'
+    )
 
     try:
         df = pd.read_parquet(monthly_file)
@@ -143,6 +161,7 @@ def load_data_for_date(target_date: datetime.datetime) -> pd.DataFrame:
         logging.error(f"Monthly data file not found: {monthly_file}")
         return pd.DataFrame()
 
+
 # Feature definitions - matches preprocess.py
 num_features = ['trip_distance']
 cat_features = ['PULocationID', 'DOLocationID', 'PU_DO']
@@ -153,11 +172,14 @@ data_definition = DataDefinition(
     categorical_columns=cat_features,
 )
 
-report = Report(metrics=[
-    ValueDrift(column='prediction'),
-    DriftedColumnsCount(),
-    MissingValueCount(column='prediction'),
-])
+report = Report(
+    metrics=[
+        ValueDrift(column='prediction'),
+        DriftedColumnsCount(),
+        MissingValueCount(column='prediction'),
+    ]
+)
+
 
 @task
 def prep_db():
@@ -177,9 +199,14 @@ def prep_db():
         logging.error(f"Database preparation failed: {e}")
         raise
 
+
 @task
-def calculate_metrics_postgresql(current_data: pd.DataFrame, reference_data: pd.DataFrame,
-                               model, timestamp: datetime.datetime):
+def calculate_metrics_postgresql(
+    current_data: pd.DataFrame,
+    reference_data: pd.DataFrame,
+    model,
+    timestamp: datetime.datetime,
+):
     """Calculate Evidently metrics and store in PostgreSQL"""
 
     if len(current_data) == 0:
@@ -195,16 +222,24 @@ def calculate_metrics_postgresql(current_data: pd.DataFrame, reference_data: pd.
     if model is not None:
         try:
             feature_cols = num_features + ['PULocationID', 'DOLocationID']
-            current_data['prediction'] = model.predict(current_data[feature_cols].fillna(0))
+            current_data['prediction'] = model.predict(
+                current_data[feature_cols].fillna(0)
+            )
         except Exception as e:
-            logging.warning(f"Model prediction failed: {e}. Using duration as prediction.")
+            logging.warning(
+                f"Model prediction failed: {e}. Using duration as prediction."
+            )
             current_data['prediction'] = current_data['duration']
     else:
         current_data['prediction'] = current_data['duration']
 
     try:
-        current_dataset = Dataset.from_pandas(current_data, data_definition=data_definition)
-        reference_dataset = Dataset.from_pandas(reference_data, data_definition=data_definition)
+        current_dataset = Dataset.from_pandas(
+            current_data, data_definition=data_definition
+        )
+        reference_dataset = Dataset.from_pandas(
+            reference_data, data_definition=data_definition
+        )
         run = report.run(reference_data=reference_dataset, current_data=current_dataset)
         result = run.dict()
         prediction_drift = result['metrics'][0]['value']
@@ -215,17 +250,28 @@ def calculate_metrics_postgresql(current_data: pd.DataFrame, reference_data: pd.
             with conn.cursor() as curr:
                 curr.execute(
                     "insert into taxi_metrics(timestamp, prediction_drift, num_drifted_columns, share_missing_values) values (%s, %s, %s, %s)",
-                    (timestamp, prediction_drift, num_drifted_columns, share_missing_values)
+                    (
+                        timestamp,
+                        prediction_drift,
+                        num_drifted_columns,
+                        share_missing_values,
+                    ),
                 )
 
-        logging.info(f"Metrics calculated for {timestamp}: drift={prediction_drift:.4f}, drifted_cols={num_drifted_columns}, missing={share_missing_values:.4f}")
+        logging.info(
+            f"Metrics calculated for {timestamp}: drift={prediction_drift:.4f}, drifted_cols={num_drifted_columns}, missing={share_missing_values:.4f}"
+        )
 
         # Extension: Save report to S3 and send to Evidently API
-        save_report_to_s3(result, f"reports/evidently_report_{timestamp.strftime('%Y%m%d_%H%M%S')}.json")
+        save_report_to_s3(
+            result,
+            f"reports/evidently_report_{timestamp.strftime('%Y%m%d_%H%M%S')}.json",
+        )
         send_report_to_evidently_api(result)
 
     except Exception as e:
         logging.error(f"Metrics calculation failed: {e}")
+
 
 def save_report_to_s3(report_dict, filename):
     """
@@ -234,19 +280,18 @@ def save_report_to_s3(report_dict, filename):
         report_dict: Evidently report as dict
         filename: S3 key for the report
     """
-    import boto3
     import json
+
+    import boto3
+
     bucket = MONITORING_BUCKET
     try:
         s3 = boto3.client('s3', endpoint_url=os.getenv('MLFLOW_S3_ENDPOINT_URL'))
-        s3.put_object(
-            Bucket=bucket,
-            Key=filename,
-            Body=json.dumps(report_dict)
-        )
+        s3.put_object(Bucket=bucket, Key=filename, Body=json.dumps(report_dict))
         logging.info(f"Saved Evidently report to s3://{bucket}/{filename}")
     except Exception as e:
         logging.error(f"Failed to save report to S3: {e}")
+
 
 def send_report_to_evidently_api(report_dict):
     """
@@ -255,6 +300,7 @@ def send_report_to_evidently_api(report_dict):
         report_dict: Evidently report as dict
     """
     import requests
+
     api_url = EVIDENTLY_API_URL
     try:
         response = requests.post(f"{api_url}/api/v1/reports", json=report_dict)
@@ -265,6 +311,7 @@ def send_report_to_evidently_api(report_dict):
     except Exception as e:
         logging.error(f"Failed to send report to Evidently API: {e}")
 
+
 def monitor_current_data(current_data_path: str):
     """Monitor single batch of data"""
 
@@ -273,6 +320,7 @@ def monitor_current_data(current_data_path: str):
     current_data = pd.read_parquet(current_data_path)
     timestamp = datetime.datetime.now()
     calculate_metrics_postgresql(current_data, reference_data, model, timestamp)
+
 
 @flow
 def batch_monitoring_backfill(start_date: datetime.datetime, num_days: int = 7):
@@ -293,7 +341,9 @@ def batch_monitoring_backfill(start_date: datetime.datetime, num_days: int = 7):
         logging.info(f"Processing day {i+1}/{num_days}: {current_date.date()}")
         current_data = load_data_for_date(current_date)
         if len(current_data) > 0:
-            calculate_metrics_postgresql(current_data, reference_data, model, current_date)
+            calculate_metrics_postgresql(
+                current_data, reference_data, model, current_date
+            )
         else:
             logging.warning(f"Skipping {current_date.date()} - no data")
         new_send = datetime.datetime.now()
@@ -304,10 +354,15 @@ def batch_monitoring_backfill(start_date: datetime.datetime, num_days: int = 7):
             last_send = last_send + datetime.timedelta(seconds=SEND_TIMEOUT)
         logging.info(f"Day {i+1} completed")
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Evidently monitoring')
-    parser.add_argument('--start-date', default='2023-06-01', help='Start date (YYYY-MM-DD)')
-    parser.add_argument('--num-days', type=int, default=7, help='Number of days to process')
+    parser.add_argument(
+        '--start-date', default='2023-06-01', help='Start date (YYYY-MM-DD)'
+    )
+    parser.add_argument(
+        '--num-days', type=int, default=7, help='Number of days to process'
+    )
     parser.add_argument('--reference-path', help='Path to reference data')
 
     args = parser.parse_args()

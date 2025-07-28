@@ -8,7 +8,9 @@ Loads ModelService with model and DictVectorizer from MLflow artifacts.
 import os
 import base64
 import logging
+
 import terraform.model as model
+
 
 def get_run_id(env_path="/var/task/.env.dev"):
     """
@@ -24,28 +26,37 @@ def get_run_id(env_path="/var/task/.env.dev"):
                 run_id = line.strip().split("=", 1)[1]
     return run_id, test_run == "True"
 
+
 RUN_ID, TEST_RUN = get_run_id()
 
-PREDICTIONS_STREAM_NAME = os.getenv('PREDICTIONS_STREAM_NAME', 'ride_predictions')
+PREDICTIONS_STREAM_NAME = os.getenv(
+    'PREDICTIONS_STREAM_NAME', 'ride_predictions'
+)  # Use prod_taxi_prediction for deployment/AWS SAM
 
 print("DEBUG RUN_ID:", RUN_ID)
 print("DEBUG TEST_RUN:", TEST_RUN)
 
 # Initialize model service (mock for tests, real for deployment)
 if TEST_RUN:
+
     class MockModel:
         def predict(self, X):
             return [21.3] * len(X)
+
     class DummyVectorizer:
         def transform(self, X):
             return [X]
-    model_service = model.ModelService(MockModel(), DummyVectorizer(), model_version=RUN_ID)
+
+    model_service = model.ModelService(
+        MockModel(), DummyVectorizer(), model_version=RUN_ID
+    )
 else:
     model_service = model.init(
         prediction_stream_name=PREDICTIONS_STREAM_NAME,
         run_id=RUN_ID,
         test_run=TEST_RUN,
     )
+
 
 def lambda_handler(event, context):
     """
@@ -63,30 +74,20 @@ def lambda_handler(event, context):
             try:
                 decoded_data = base64.b64decode(encoded_data).decode("utf-8")
                 # Example prediction logic (replace with real model_service usage)
-                predictions.append({
-                    "model": "ride_duration_prediction_model",
-                    "prediction": {
-                        "ride_id": 256,
-                        "ride_duration": 21.3
-                    },
-                    "input": decoded_data
-                })
+                predictions.append(
+                    {
+                        "model": "ride_duration_prediction_model",
+                        "prediction": {"ride_id": 256, "ride_duration": 21.3},
+                        "input": decoded_data,
+                    }
+                )
             except Exception as e:
                 logging.error("Base64 decode error: %s", e)
                 predictions.append({"error": str(e)})
         if TEST_RUN:
-            return {
-                "statusCode": 200,
-                "predictions": predictions
-            }
+            return {"statusCode": 200, "predictions": predictions}
         else:
-            return {
-                "statusCode": 200,
-                "body": predictions
-            }
+            return {"statusCode": 200, "body": predictions}
     except Exception as e:
         logging.error("Unhandled exception: %s", e)
-        return {
-            "statusCode": 500,
-            "body": f"Unhandled exception: {str(e)}"
-        }
+        return {"statusCode": 500, "body": f"Unhandled exception: {str(e)}"}

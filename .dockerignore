@@ -1,26 +1,60 @@
+# .dockerignore
+
+# Python bytecode cache
 __pycache__/
 *.pyc
+
+# Pytest and coverage
 .pytest_cache/
 htmlcov/
-.terraform
+
+# Terraform state and cache
+.terraform/
 *.tfstate
 *.tfstate.*
+
+# Virtual environments
 myenv/
 venv/
+
+# Environment files (uncomment if you don't want them in the image)
 #.env.prod
 #.env.dev
-.vscode
+
+# IDE and OS files
+.vscode/
 .DS_Store
+
+# MLflow artifacts and database
 mlruns/
 mlflow.db
+
+# AWS credentials and secrets
 .aws/
 *.pem
 *.key
+
+# Other credential files
 credentials.json
 secrets.yaml
 .secrets
+
+# Data and output artifacts
 data/
 output/
+event.b64
+event.json
+output.json
+
+# Model artifacts (ignore large or generated model files, keep config)
+model/model.pkl
+model/MLmodel
+
+# Plan and temporary files
 plan.md
 *.log
 *.tmp
+
+# Test results
+integration-test-results.txt
+unit-test-results.txt

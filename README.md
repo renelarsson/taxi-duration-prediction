@@ -2,19 +2,19 @@
 
 ## Objective
 
-Apply MLOps best practices to build, deploy, and monitor a machine learning model for predicting taxi ride durations.  
+Apply MLOps best practices to build, deploy, and monitor a machine learning model for predicting taxi ride durations.
 This project demonstrates experiment tracking, reproducible pipelines, cloud deployment, monitoring, and automation using AWS and LocalStack.
 
 ---
 
 ## Problem Statement
 
-Predict the duration of taxi rides using historical trip data.  
+Predict the duration of taxi rides using historical trip data.
 The project covers:
 - Data selection and preprocessing
 - Model training and experiment tracking
 - Automated deployment to AWS Lambda (streaming inference)
-- Model monitoring and alerting
+- Model monitoring and alerting (automated)
 - Infrastructure as code and CI/CD
 
 ---
@@ -24,241 +24,184 @@ The project covers:
 - **Cloud:** AWS (Lambda, S3, Kinesis, ECR), LocalStack (AWS emulation)
 - **Experiment Tracking & Model Registry:** MLflow
 - **Workflow Orchestration:** Prefect
-- **Monitoring:** Evidently
+- **Monitoring:** Evidently (automated)
 - **CI/CD:** GitHub Actions
 - **Infrastructure as Code:** Terraform, AWS SAM
 - **Containerization:** Docker
-- **Code Quality:** Black, isort, pylint, pytest, pre-commit	-> ????
+- **Code Quality:** Black, isort, pylint, pytest, pre-commit
+- **Visualization/Monitoring:** Grafana (via config, not manual use)
 
 ---
 
-## Project Structure	-> !!!! HERE
+## Project Structure
 
 ```
 taxi-duration-prediction/
-├── terraform/                # IaC scripts, Lambda handler, Dockerfile
+├── src/                      # Source code for data, models, deployment, monitoring
+│   ├── data/                 # Data extraction and preprocessing
+│   ├── deployment/           # Lambda and Kinesis consumer code
+│   ├── models/               # Model training and prediction
+│   └── monitoring/           # Model/data drift monitoring (Evidently)
+├── workflows/                # ML pipeline scripts (Prefect, batch, etc.)
+├── terraform/                # IaC scripts, Lambda handler, Dockerfile, requirements
+│   ├── Dockerfile            # Lambda container image definition
+│   ├── lambda_function.py    # Lambda entry point
+│   ├── model.py              # Core ML logic for Lambda
+│   ├── requirements.txt      # Lambda dependencies
+│   ├── backend-dev.conf      # Terraform backend config (dev)
+│   ├── backend-prod.conf     # Terraform backend config (prod)
+│   ├── main.tf               # Main Terraform configuration
+│   ├── variables.tf          # Terraform variables
+│   ├── modules/              # Terraform modules (ecr, kinesis, lambda, s3)
+│   └── vars/                 # Environment-specific tfvars files
+│       ├── prod.tfvars
+│       └── stg.tfvars
 ├── tests/                    # Unit and integration tests
+│   ├── integration/          # End-to-end pipeline tests
+│   └── unit/                 # Model unit tests
+├── model/                    # Model artifacts and configs (not versioned)
+├── scripts/                  # Automation and deployment scripts
+├── config/                   # Configuration files (e.g., Grafana dashboards)
 ├── .github/workflows/        # CI/CD automation
-├── model.py                  # ML model logic
-├── lambda_function.py        # Lambda entry point
-├── requirements.txt          # Production dependencies
-├── Dockerfile                # Container image definition
-├── template.yaml             # AWS SAM template
-├── .env.dev / .env.prod      # Environment variables
+├── requirements-dev.txt      # Dev dependencies
+├── Makefile                  # Automation commands
 ├── README.md                 # Project documentation
-└── ...                       # Other supporting files
+└── setup_project.sh          # One-step environment setup script
 ```
 
 ---
 
 ## Environment Separation
 
-- **Development:**  
-  - Use `.env.dev` and LocalStack for local AWS emulation.
-  - Streams: `stg_taxi_trip_events`, `stg_taxi_predictions`
-  - S3 bucket: `rll-models-dev`
+This project supports **environment separation** for development and production:
 
-- **Production:**  
-  - Use `.env.prod` for AWS deployment.
-  - Streams: `prod_taxi_trip_events`, `prod_taxi_predictions`
-  - S3 bucket: `rll-models-prod`
+- **Key Files for Environment Separation:**
+  - `.env.dev-user` — Development environment variables
+  - `.env.prod-user` — Production environment variables
+  - `template.yaml` — AWS SAM template (parameters for buckets, streams, etc.)
+  - `terraform/vars/stg.tfvars` — Terraform dev variables
+  - `terraform/vars/prod.tfvars` — Terraform prod variables
+  - `.github/workflows/cd.yaml` — CI/CD pipeline, uses correct bucket per environment
+  - `sam-env.json` — Local SAM testing, update values for dev/prod as needed
 
-All code loads configuration from environment variables for easy switching.
+- **Development:**
+  - Use `.env.dev-user` for local development and testing.
+  - Example: `MODEL_BUCKET=<your-dev-s3-bucket>`
+  - Streams: `<dev-taxi-trip-events>`, `<dev-taxi-predictions>`
+  - S3 endpoint: LocalStack or AWS dev resources.
 
----
+- **Production:**
+  - Use `.env.prod-user` for real AWS deployment.
+  - Example: `MODEL_BUCKET=<your-prod-s3-bucket>`
+  - Streams: `<prod-taxi-trip-events>`, `<prod-taxi-predictions>`
+  - S3 endpoint: AWS production resources.
 
-## Step-by-Step Procedures
-
-### 1. **Local Development & Testing with LocalStack**
-
-**Why:**  
-Emulate AWS services locally for fast, cost-free development and testing.
-
-**Commands:**
-
-- **Start LocalStack and supporting services:**
-  ```bash
-  docker-compose -f docker-compose.local.yaml up
-  ```
-  *Starts LocalStack, Kinesis, S3, and other services locally.*
-
-- **Run unit and integration tests:**
-  ```bash
-  pytest
-  ```
-  *Validates code correctness and pipeline integration.*
-
-- **Train and register model with MLflow:**
-  ```bash
-  python src/train.py
-  ```
-  *Trains the model and logs experiments to MLflow.*
-
-- **Monitor model with Evidently:**
-  ```bash
-  python src/monitor.py
-  ```
-  *Calculates metrics and detects drift.*
+All code loads environment variables using `os.getenv` or equivalent, so you can switch environments by changing the `.env` file or deployment configuration.
+No bucket, stream, or run_id values are hardcoded in production logic.
 
 ---
 
-### 2. **Provision AWS Infrastructure with Terraform**
+## Environment Setup Guidelines
 
-**Why:**  
-Automate creation of AWS resources (Lambda, Kinesis, S3, ECR) for reproducible cloud deployment.
-
-**Commands:**
-
-- **Initialize and apply Terraform:**
+- Use `.env.dev-user` for local/dev/LocalStack.
+- Use `.env.prod-user` for production/AWS.
+- Load environment variables in your shell with:
   ```bash
-  cd terraform
-  terraform init
-  terraform apply -var-file=vars/prod.tfvars
+  export $(grep -v '^#' <your-env-file> | xargs)
   ```
-  *Creates all required AWS resources for production.*
+- Use Docker Compose for LocalStack, Terraform for infra, SAM for serverless, and Docker exec for debugging.
 
 ---
 
-### 3. **Build and Deploy Lambda with AWS SAM and Docker**
+## Usage
 
-**Why:**  
-Package and deploy the model as a containerized Lambda function for scalable, serverless inference.
+1. **Set up your environment:**
+   - Copy `.env.dev-user` or `.env.prod-user` to `.env` as needed.
+   - Export environment variables or use a tool like `python-dotenv`.
 
-**Commands:**
+2. **Development:**
+   - Train and test locally using `.env.dev-user`.
+   - Use LocalStack for AWS emulation if desired.
 
-- **Build Docker image for Lambda:**
-  ```bash
-  docker build -f terraform/Dockerfile -t taxi-duration-lambda:latest .
-  ```
-  *Creates a container image with all code and dependencies.*
+3. **Production:**
+   - Deploy using `.env.prod-user` and real AWS resources.
+   - Use `sam deploy --parameter-overrides ModelBucket=<your-prod-s3-bucket> ...` for production.
 
-- **Create ECR repository (if not exists):**
-  ```bash
-  aws ecr create-repository --repository-name taxi-duration-lambda --region eu-north-1
-  ```
-  *Prepares ECR for storing Lambda image.*
-
-- **Tag and push image to ECR:**
-  ```bash
-  docker tag taxi-duration-lambda:latest <your-account-id>.dkr.ecr.eu-north-1.amazonaws.com/taxi-duration-lambda:latest
-  aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.eu-north-1.amazonaws.com
-  docker push <your-account-id>.dkr.ecr.eu-north-1.amazonaws.com/taxi-duration-lambda:latest
-  ```
-  *Uploads the image to AWS ECR for Lambda deployment.*
-
-- **Deploy Lambda with SAM:**
-  ```bash
-  sam deploy --guided
-  ```
-  *Deploys the Lambda function using the container image from ECR.  
-  Prompts for stack name, region, and environment variables.*
+4. **Switching environments:**
+   - Change the `.env` file or deployment parameters.
+   - No code changes required—just update environment variables.
 
 ---
 
-### 4. **Invoke and Test Lambda Function on AWS**
+## To run or reproduce the project:
 
-**Why:**  
-Validate that the deployed Lambda processes events correctly.
-
-**Commands:**
-
-- **Prepare a valid Kinesis event (event.json):**
-  ```json
-  {
-    "Records": [
-      {
-        "kinesis": {
-          "kinesisSchemaVersion": "1.0",
-          "partitionKey": "1",
-          "sequenceNumber": "1234567890",
-          "data": "<base64-encoded-payload>",
-          "approximateArrivalTimestamp": 1.654161514132E9
-        },
-        "eventSource": "aws:kinesis",
-        "eventVersion": "1.0",
-        "eventID": "shardId-000000000000:1234567890",
-        "eventName": "aws:kinesis:record",
-        "invokeIdentityArn": "arn:aws:iam::<your-account-id>:role/lambda-kinesis-role",
-        "awsRegion": "eu-north-1",
-        "eventSourceARN": "arn:aws:kinesis:eu-north-1:<your-account-id>:stream/prod_taxi_predictions"
-      }
-    ]
-  }
-  ```
-
-- **Invoke Lambda with AWS CLI:**
-  ```bash
-  aws lambda invoke --function-name <your-lambda-function-name> --payload file://event.json output.json
-  ```
-  *Executes the Lambda function with a test event and writes the result to output.json.*
-
-- **Check CloudWatch logs:**
-  *Review logs for errors, output, and debugging information.*
-
----
-
-### 5. **Monitor and Clean Up AWS Resources**
-
-**Why:**  
-Avoid ongoing charges and keep your cloud environment tidy.
-
-**Commands:**
-
-- **Delete Kinesis streams:**
-  ```bash
-  aws kinesis delete-stream --stream-name prod_taxi_predictions --region eu-north-1 --enforce-consumer-deletion
-  aws kinesis delete-stream --stream-name prod_taxi_trip_events --region eu-north-1 --enforce-consumer-deletion
-  ```
-  *Stops hourly charges for streaming resources.*
-
-- **Delete ECR repository:**
-  ```bash
-  aws ecr delete-repository --repository-name taxi-duration-lambda --region eu-north-1 --force
-  ```
-  *Removes container images and stops storage charges.*
-
-- **Delete S3 objects (if needed):**
-  ```bash
-  aws s3 rm s3://aws-sam-cli-managed-default-samclisourcebucket-wmwpbdmv6ah1 --recursive
-  ```
-  *Removes stored data to avoid charges.*
-
-- **Delete Lambda function:**
-  ```bash
-  aws lambda delete-function --function-name <your-lambda-function-name> --region eu-north-1
-  ```
-  *Removes the deployed Lambda function.*
-
-- **Delete CloudFormation stack:**
-  ```bash
-  aws cloudformation delete-stack --stack-name taxi-duration-prediction-prod --region eu-north-1
-  ```
-  *Removes all managed resources.*
+1. **Clone the repository**
+2. **(Optional) Run the setup script:**
+   ```bash
+   chmod +x setup_project.sh
+   ./setup_project.sh
+   ```
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   pip install -r requirements-dev.txt
+   ```
+4. **Set up environment variables:**
+   - Copy `.env.dev-user` or `.env.prod-user` to `.env` as needed and fill in your secrets and configuration.
+   - All code loads buckets, streams, and run IDs from environment variables.
+5. **Start services:**
+   ```bash
+   docker-compose --env-file .env.dev-user -f docker-compose.local.yaml up -d
+   ```
+6. **Provision infrastructure:**
+   - Use Terraform scripts in `terraform/` to deploy AWS resources:
+     ```bash
+     cd terraform
+     terraform init -backend-config=backend-dev.conf
+     terraform apply -var-file=vars/dev.tfvars
+     ```
+7. **Train and register your model:**
+   - Run workflows in `workflows/` or scripts in `src/`:
+     ```bash
+     python src/train.py
+     ```
+8. **Automate and run tests:**
+   ```bash
+   make full-test
+   ```
+   *Full workflow: start services, ensure S3/Kinesis exist, train, test, shutdown, clean LocalStack data. Runs all unit and integration tests with code quality checks (Black, isort, pylint, pytest, pre-commit).*
+9. **Deploy the model:**
+   - Use scripts in `scripts/` or CI/CD pipeline.
+   - For Lambda, build and push Docker image, then deploy with SAM:
+     ```bash
+     docker build -f terraform/Dockerfile -t taxi-duration-lambda:latest .
+     docker tag taxi-duration-lambda:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/taxi-duration-lambda:latest
+     aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
+     docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/taxi-duration-lambda:latest
+     sam deploy --guided
+     ```
+10. **Invoke and test Lambda:**
+    - Prepare a valid Kinesis event (`event.json`) and invoke:
+      > **Note:**
+      > Before deploying or testing on AWS, update the `eventSourceARN` in `tests/integration/event.json` to match your actual AWS account ID and Kinesis stream name (e.g., replace `<your-account-id>` and `<prod-stream-name>` with your deployed values).
+      ```bash
+      aws lambda invoke --function-name <your-lambda-function-name> --payload file://event.json output.json
+      ```
+    - Check CloudWatch logs for output and errors.
+11. **Monitor and clean up AWS resources:**
+    - Delete Kinesis streams, ECR repos, S3 objects, Lambda functions, and CloudFormation stacks as needed to avoid charges.
 
 ---
 
 ## Reproducibility & Best Practices
 
 - All dependencies are versioned in `requirements.txt`.
-- Environment separation via `.env.dev` and `.env.prod`.
+- Environment separation via `.env.dev-user` and `.env.prod-user`.
 - Infrastructure as code with Terraform and AWS SAM.
 - CI/CD pipeline with GitHub Actions.
 - Unit and integration tests in `tests/`.
 - Code quality enforced with Black, isort, pylint, and pre-commit hooks.
 - Makefile for automation.
-
----
-
-## Notes for Peer Review
-
-- **Problem is clearly described and solved end-to-end.**
-- **Cloud and IaC tools are used for provisioning and deployment.**
-- **Experiment tracking and model registry with MLflow.**
-- **Workflow orchestration with Prefect.**
-- **Model deployment is containerized and cloud-ready.**
-- **Comprehensive monitoring with Evidently.**
-- **Instructions are clear and reproducible.**
-- **Best practices (testing, linting, CI/CD) are followed.**
 
 ---
 
@@ -270,6 +213,7 @@ Avoid ongoing charges and keep your cloud environment tidy.
 - [Terraform Documentation](https://www.terraform.io/docs/)
 - [MLflow Documentation](https://mlflow.org/docs/latest/index.html)
 - [Evidently Documentation](https://docs.evidentlyai.com/)
+- [Grafana Documentation](https://grafana.com/docs/)
 
 ---
 

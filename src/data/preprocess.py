@@ -4,10 +4,12 @@
 # All bucket, artifact, and endpoint values are loaded from environment variables for flexibility.
 
 import os
-import pandas as pd
 import pickle
-from sklearn.feature_extraction import DictVectorizer
+
+import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction import DictVectorizer
+
 
 def get_data_bucket():
     """
@@ -15,6 +17,7 @@ def get_data_bucket():
     Uses .env.dev for development, .env.prod for production.
     """
     return os.getenv('DATA_BUCKET', 'taxi-data-dev')
+
 
 def prepare_features(df: pd.DataFrame, categorical: list, numerical: list):
     """
@@ -31,6 +34,7 @@ def prepare_features(df: pd.DataFrame, categorical: list, numerical: list):
     categorical = categorical + ['PU_DO']
     dicts = df[categorical + numerical].to_dict(orient='records')
     return dicts
+
 
 def preprocess_data(df_train: pd.DataFrame, df_val: pd.DataFrame):
     """
@@ -53,6 +57,7 @@ def preprocess_data(df_train: pd.DataFrame, df_val: pd.DataFrame):
     X_val = dv.transform(val_dicts)
     return X_train, X_val, y_train, y_val, dv
 
+
 def save_preprocessor(dv: DictVectorizer, filepath: str):
     """
     Save DictVectorizer to file or S3 bucket (bucket from environment).
@@ -62,8 +67,10 @@ def save_preprocessor(dv: DictVectorizer, filepath: str):
     """
     # If saving to S3, use bucket from environment
     if filepath.startswith("s3://"):
-        import boto3
         import io
+
+        import boto3
+
         bucket = filepath.split("/")[2]
         key = "/".join(filepath.split("/")[3:])
         buf = io.BytesIO()
@@ -75,6 +82,7 @@ def save_preprocessor(dv: DictVectorizer, filepath: str):
         with open(filepath, 'wb') as f_out:
             pickle.dump(dv, f_out)
 
+
 def load_preprocessor(filepath: str) -> DictVectorizer:
     """
     Load DictVectorizer from file or S3 bucket (bucket from environment).
@@ -85,6 +93,7 @@ def load_preprocessor(filepath: str) -> DictVectorizer:
     """
     if filepath.startswith("s3://"):
         import boto3
+
         bucket = filepath.split("/")[2]
         key = "/".join(filepath.split("/")[3:])
         s3 = boto3.client('s3', endpoint_url=os.getenv('MLFLOW_S3_ENDPOINT_URL'))
@@ -95,6 +104,7 @@ def load_preprocessor(filepath: str) -> DictVectorizer:
         with open(filepath, 'rb') as f_in:
             dv = pickle.load(f_in)
         return dv
+
 
 def prepare_dictionaries(df: pd.DataFrame):
     """

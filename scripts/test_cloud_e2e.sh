@@ -19,7 +19,7 @@ echo "AWS Region: ${AWS_REGION}"
 echo "Input stream: ${KINESIS_STREAM_INPUT}"
 echo "Output stream: ${KINESIS_STREAM_OUTPUT}"
 
-# Test ride data 
+# Test ride data
 TEST_RIDE_DATA='{
     "ride": {
         "PULocationID": 130,
@@ -81,22 +81,22 @@ RECORDS_OUTPUT=$(aws kinesis get-records \
 
 if [ $? -eq 0 ]; then
     echo "Records retrieved successfully"
-    
+
     # Check if records exist
     RECORD_COUNT=$(echo ${RECORDS_OUTPUT} | jq '.Records | length')
     echo "Number of records found: ${RECORD_COUNT}"
-    
+
     if [ "${RECORD_COUNT}" -gt "0" ]; then
         echo "SUCCESS: Found prediction records in output stream"
-        
+
         # Display first record
         echo "First record data:"
         echo ${RECORDS_OUTPUT} | jq '.Records[0].Data' | base64 -d | jq .
-        
+
         # Validate record structure
         FIRST_RECORD_DATA=$(echo ${RECORDS_OUTPUT} | jq -r '.Records[0].Data')
         DECODED_DATA=$(echo ${FIRST_RECORD_DATA} | base64 -d)
-        
+
         # Check if prediction exists
         if echo ${DECODED_DATA} | jq -e '.prediction' > /dev/null; then
             echo "SUCCESS: Record contains prediction data"
@@ -105,7 +105,7 @@ if [ $? -eq 0 ]; then
         else
             echo "WARNING: Record does not contain expected prediction structure"
         fi
-        
+
         # Check if ride_id matches
         RECORD_RIDE_ID=$(echo ${DECODED_DATA} | jq -r '.prediction.ride_id // .ride_id')
         if [ "${RECORD_RIDE_ID}" = "156" ]; then
@@ -113,7 +113,7 @@ if [ $? -eq 0 ]; then
         else
             echo "WARNING: Ride ID mismatch. Expected: 156, Got: ${RECORD_RIDE_ID}"
         fi
-        
+
     else
         echo "WARNING: No records found in output stream"
         echo "This could mean:"
@@ -145,7 +145,7 @@ LATEST_LOG_STREAM=$(aws logs describe-log-streams \
 
 if [ "${LATEST_LOG_STREAM}" != "None" ] && [ -n "${LATEST_LOG_STREAM}" ]; then
     echo "Latest log stream: ${LATEST_LOG_STREAM}"
-    
+
     # Get recent log events
     RECENT_LOGS=$(aws logs get-log-events \
         --log-group-name ${LOG_GROUP} \
@@ -154,7 +154,7 @@ if [ "${LATEST_LOG_STREAM}" != "None" ] && [ -n "${LATEST_LOG_STREAM}" ]; then
         --region ${AWS_REGION} \
         --query 'events[].message' \
         --output text 2>/dev/null)
-    
+
     if [ -n "${RECENT_LOGS}" ]; then
         echo "Recent Lambda logs:"
         echo "${RECENT_LOGS}"

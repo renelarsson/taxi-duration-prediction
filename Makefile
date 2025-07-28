@@ -26,10 +26,20 @@ test:
 	@pytest tests/
 
 # Code quality checks
-quality_checks:
+quality-checks:
 	@isort .
 	@black .
 	@pylint --recursive=y .
+	@pre-commit run --all-files
+
+pre-commit:
+	@pre-commit run --all-files
+
+lint:
+	@isort .
+	@black .
+	@pylint --recursive=y .
+	@pre-commit run --all-files
 
 # Build Docker image with environment separation
 build-image:
@@ -59,7 +69,7 @@ full-test:
 	# Ensure S3 bucket and Kinesis stream exist in LocalStack before tests
 	aws --endpoint-url=http://localhost:4566 s3 mb s3://rll-models-dev --region eu-north-1 || true
 	aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_predictions --shard-count 1 || true
-	aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_trip_events --shard-count 1 || true	
+	aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_trip_events --shard-count 1 || true
 	@echo "Training model..."
 	conda run -n myenv docker exec taxi-duration-prediction-backend-1 bash -c "set -a; source /var/task/.env.dev; set +a; python -m src.models.train"
 	@echo "Running unit tests..."
@@ -73,4 +83,4 @@ full-test:
 	rm -rf .localstack .localstack-volume localstack-data
 	@echo "All done. See unit-test-results.txt and integration-test-results.txt for results."
 
-.PHONY: setup env-dev env-prod test quality_checks build-image integration-test publish-image clean full-test
+.PHONY: setup env-dev env-prod test quality-checks build-image integration-test publish-image clean full-test

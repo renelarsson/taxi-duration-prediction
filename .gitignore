@@ -1,9 +1,11 @@
 # .gitignore
 
-# Python bytecode cache (should be in .gitignore)
+# Python bytecode cache
 __pycache__/
 *.pyc
-*.zip 
+
+# Build and distribution artifacts
+*.zip
 dist/
 sam-installation/
 
@@ -13,21 +15,21 @@ sam-installation/
 htmlcov/
 
 # Terraform state and cache
-.terraform
+.terraform/
 *.tfstate
 *.tfstate.*
 
 # Virtual environments
 myenv/
 venv/
-.env
 
 # Environment files with secrets and user config
+.env
 .env.prod
 .env.dev
 
 # IDE and OS files
-.vscode
+.vscode/
 .DS_Store
 
 # MLflow artifacts and database
@@ -48,8 +50,19 @@ secrets.yaml
 # Data and output artifacts
 data/
 output/
+event.b64
+event.json
+output.json
+
+# Model artifacts (ignore large or generated model files, keep config)
+model/model.pkl
+model/MLmodel
 
 # Plan and temporary files
 plan.md
 *.log
 *.tmp
+
+# Test results
+integration-test-results.txt
+unit-test-results.txt

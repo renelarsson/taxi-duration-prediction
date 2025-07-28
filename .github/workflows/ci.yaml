@@ -1,4 +1,4 @@
-name: CI-Tests 
+name: CI-Tests
 on:
   pull_request:
     branches:
@@ -31,6 +31,9 @@ jobs:
 
       - name: Lint
         run: pylint --recursive=y .
+
+      - name: Run pre-commit hooks
+        run: pre-commit run --all-files
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1

@@ -4,16 +4,18 @@ Ensures DictVectorizer is always uploaded for inference.
 Automatically updates .env.dev with the latest RUN_ID after training.
 """
 
+import os
 import pickle
 import shutil
+from pathlib import Path
+
+import boto3
+import numpy as np
 import mlflow
 import mlflow.sklearn
-import os
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-import numpy as np
-from pathlib import Path
-import boto3
+from sklearn.ensemble import RandomForestRegressor
+
 
 def update_env_run_id(run_id, env_path="/app/.env.dev"):
     """
@@ -37,6 +39,7 @@ def update_env_run_id(run_id, env_path="/app/.env.dev"):
     with open(env_path, "w") as f:
         f.writelines(lines)
 
+
 def train_model(X_train, X_val, y_train, y_val, dv):
     # Set MLflow tracking URI and experiment
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
@@ -59,7 +62,7 @@ def train_model(X_train, X_val, y_train, y_val, dv):
             else:
                 s3.create_bucket(
                     Bucket=bucket,
-                    CreateBucketConfiguration={"LocationConstraint": aws_region}
+                    CreateBucketConfiguration={"LocationConstraint": aws_region},
                 )
 
     with mlflow.start_run():
@@ -98,6 +101,7 @@ def train_model(X_train, X_val, y_train, y_val, dv):
         print(f"Model saved with run_id: {run_id}")
         update_env_run_id(run_id, env_path="/app/.env.dev")
         return rf, rmse
+
 
 if __name__ == "__main__":
     from src.data.extract import download_data, read_dataframe

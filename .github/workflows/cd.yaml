@@ -2,7 +2,7 @@
 # Environment separation: Uses .env.dev and .env.prod created from GitHub Actions secrets
 # MODEL_BUCKET and related values are set via Terraform outputs and environment variables
 
-name: CD-Deploy 
+name: CD-Deploy
 on:
   push:
     branches:
@@ -32,7 +32,7 @@ jobs:
       # Terraform plan
       - name: TF plan
         id: tf-plan
-        working-directory: terraform   
+        working-directory: terraform
         run: |
           terraform init -backend-config="key=mlops-capstone-prod.tfstate" -reconfigure
           terraform plan -var-file=vars/prod.tfvars
