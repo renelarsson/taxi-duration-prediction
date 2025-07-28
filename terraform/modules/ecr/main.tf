@@ -19,11 +19,12 @@ resource "null_resource" "ecr_image" {
 #  }
 
   provisioner "local-exec" {
-    command = <<EOT
+    command = <<EOF
       aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${var.account_id}.dkr.ecr.${var.region}.amazonaws.com
-      docker build -f terraform/Dockerfile -t ${var.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.ecr_repo}:latest .
-      docker push ${var.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.ecr_repo}:latest
-    EOT
+      docker build -f terraform/Dockerfile -t ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag} ${path.root}
+      docker push ${aws_ecr_repository.repo.repository_url}:${var.ecr_image_tag}
+    EOF
+    working_dir = "${path.root}" # Set Docker build context to project root
   }
 }
 
