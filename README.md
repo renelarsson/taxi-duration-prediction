@@ -113,6 +113,27 @@ No bucket, stream, or run_id values are hardcoded in production logic.
 
 ---
 
+## Switching Between Development and Production Environments
+
+For clarity and safety, keep separate environment files for development and production (e.g., `.env.dev`, `.env.prod`).
+
+- **Before running any workflow or command, copy the appropriate file to `.env`:**
+  - For development/localstack:
+    ```bash
+    cp .env.dev .env
+    export $(grep -v '^#' .env | xargs)
+    ```
+  - For production/AWS:
+    ```bash
+    cp .env.prod .env
+    export $(grep -v '^#' .env | xargs)
+    ```
+- Most tools (Docker Compose, Python dotenv, etc.) use `.env` by default. Always ensure `.env` matches your intended environment before running commands.
+
+---
+
+---
+
 ## Usage
 
 1. **Set up your environment:**
@@ -149,46 +170,70 @@ No bucket, stream, or run_id values are hardcoded in production logic.
 4. **Set up environment variables:**
    - Copy `.env.dev-user` or `.env.prod-user` to `.env` as needed and fill in your secrets and configuration.
    - All code loads buckets, streams, and run IDs from environment variables.
-5. **Start services:**
+
+---
+
+### LocalStack Development Workflow (Manual)
+
+5. **Build Docker images:**
+   ```bash
+   docker-compose --env-file .env.dev -f docker-compose.local.yaml build
+   ```
+6. **Start LocalStack and services:**
    ```bash
    docker-compose --env-file .env.dev-user -f docker-compose.local.yaml up -d
    ```
-6. **Provision infrastructure:**
-   - Use Terraform scripts in `terraform/` to deploy AWS resources:
-     ```bash
-     cd terraform
-     terraform init -backend-config=backend-dev.conf
-     terraform apply -var-file=vars/dev.tfvars
-     ```
-7. **Train and register your model:**
-   - Run workflows in `workflows/` or scripts in `src/`:
-     ```bash
-     python src/train.py
-     ```
-8. **Automate and run tests:**
+7. **Create AWS resources in LocalStack:**
+   ```bash
+   aws --endpoint-url=http://localhost:4566 s3 mb s3://your-s3-bucket --region your-region
+   aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_predictions --shard-count 1 --region your-region
+   aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_trip_events --shard-count 1 --region your-region
+   ```
+8. **Run training and tests inside the backend container:**
+   ```bash
+   docker exec -it taxi-duration-prediction-backend-1 bash
+   export $(grep -v '^#' /var/task/.env.dev | xargs)
+   python -m src.models.train
+   pytest /var/task/tests/unit/
+   pytest /var/task/tests/integration
+   exit
+   ```
+9. **Automate and run tests:**
    ```bash
    make full-test
    ```
-   *Full workflow: start services, ensure S3/Kinesis exist, train, test, shutdown, clean LocalStack data. Runs all unit and integration tests with code quality checks (Black, isort, pylint, pytest, pre-commit).*
-9. **Deploy the model:**
-   - Use scripts in `scripts/` or CI/CD pipeline.
-   - For Lambda, build and push Docker image, then deploy with SAM:
-     ```bash
-     docker build -f terraform/Dockerfile -t taxi-duration-lambda:latest .
-     docker tag taxi-duration-lambda:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/taxi-duration-lambda:latest
-     aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
-     docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/taxi-duration-lambda:latest
-     sam deploy --guided
-     ```
-10. **Invoke and test Lambda:**
+   *This will start services, ensure S3/Kinesis exist, train, test, shutdown, and clean LocalStack data. Runs all unit and integration tests with code quality checks (Black, isort, pylint, pytest, pre-commit).*
+10. **Shutdown and clean up LocalStack:**
+   ```bash
+   docker-compose --env-file .env.dev -f docker-compose.local.yaml down
+   docker-compose --env-file .env.dev -f docker-compose.local.yaml down -v
+   sudo rm -rf ./localstack-data
+   ```
+
+---
+
+### AWS SAM Deployment (Production/Cloud)
+
+11. **Switch to production environment:**
+    - Copy `.env.prod-user` to `.env` and update with your production values.
+12. **Build and push Lambda Docker image:**
+    ```bash
+    docker build -f terraform/Dockerfile -t taxi-duration-lambda:latest .
+    docker tag taxi-duration-lambda:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/taxi-duration-lambda:latest
+    aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
+    docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/taxi-duration-lambda:latest
+    ```
+13. **Deploy with AWS SAM:**
+    ```bash
+    sam deploy --guided
+    ```
+14. **Invoke and test Lambda:**
     - Prepare a valid Kinesis event (`event.json`) and invoke:
-      > **Note:**
-      > Before deploying or testing on AWS, update the `eventSourceARN` in `tests/integration/event.json` to match your actual AWS account ID and Kinesis stream name (e.g., replace `<your-account-id>` and `<prod-stream-name>` with your deployed values).
       ```bash
       aws lambda invoke --function-name <your-lambda-function-name> --payload file://event.json output.json
       ```
     - Check CloudWatch logs for output and errors.
-11. **Monitor and clean up AWS resources:**
+15. **Monitor and clean up AWS resources:**
     - Delete Kinesis streams, ECR repos, S3 objects, Lambda functions, and CloudFormation stacks as needed to avoid charges.
 
 ---

@@ -1,4 +1,6 @@
 # Use .env.dev for local development with LocalStack.
+# All persistent data is stored in your WSL home directory to avoid filling up your C: drive.
+
 version: "3.8"
 
 services:
@@ -39,7 +41,10 @@ services:
     environment:
       SERVICES: kinesis,s3,lambda
       DEFAULT_REGION: ${AWS_REGION}
-      DATA_DIR: /tmp/localstack/data
+      # Store LocalStack data in a new directory to avoid stale locks
+      DATA_DIR: /tmp/localstack-data
+    volumes:
+      - "${WSL_HOME}/localstack-data:/tmp/localstack-data"
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
@@ -50,3 +55,5 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
     command: /bin/sh -c "pip install boto3 && mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root s3://${MODEL_BUCKET}/ --host 0.0.0.0 --port 5000"
+    volumes:
+      - "${WSL_HOME}/mlflow-data:/mlflow"
