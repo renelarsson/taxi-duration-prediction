@@ -12,10 +12,8 @@ RUN pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 COPY terraform/ ${LAMBDA_TASK_ROOT}/terraform/
 COPY src/ ${LAMBDA_TASK_ROOT}/src/
 
-# Create empty environment files if they don't exist (for CI/CD)
-RUN touch .env.dev .env.prod
-COPY .env.dev ${LAMBDA_TASK_ROOT}/.env.dev
-COPY .env.prod ${LAMBDA_TASK_ROOT}/.env.prod
+# Create empty environment files for CI/CD (no COPY needed)
+RUN touch ${LAMBDA_TASK_ROOT}/.env.dev ${LAMBDA_TASK_ROOT}/.env.prod
 
 # Copy tests
 COPY tests/ ${LAMBDA_TASK_ROOT}/tests/
