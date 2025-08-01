@@ -20,8 +20,13 @@ resource "null_resource" "ecr_image" {
 
   provisioner "local-exec" {
     command = <<EOF
+      echo "=== Debug: Checking if .env.prod exists ==="
+      ls -la ../.env.prod || echo ".env.prod not found"
+      echo "=== Starting ECR login ==="
       aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${aws_ecr_repository.repo.repository_url}
+      echo "=== Starting Docker build ==="
       docker build -f ../terraform/Dockerfile -t ${aws_ecr_repository.repo.repository_url}:latest ..
+      echo "=== Starting Docker push ==="
       docker push ${aws_ecr_repository.repo.repository_url}:latest
 EOF
   }
