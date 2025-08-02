@@ -1,15 +1,15 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.9.23, pytest-8.4.1, pluggy-1.6.0
-rootdir: /var/task/tests/unit
+rootdir: /var/task
 plugins: anyio-4.9.0, Faker-37.5.3
 collected 4 items
 
-../var/task/tests/unit/model_test.py ....                                [100%]
+tests/unit/model_test.py ....                                            [100%]
 
 =============================== warnings summary ===============================
-../var/task/pydantic/_internal/_config.py:323
+pydantic/_internal/_config.py:323
   /var/task/pydantic/_internal/_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
     warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-========================= 4 passed, 1 warning in 1.43s =========================
+========================= 4 passed, 1 warning in 1.51s =========================

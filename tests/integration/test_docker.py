@@ -9,13 +9,13 @@ import json
 
 import requests
 
-# Load endpoint from environment variable, fallback to local default
+# Load endpoint from environment variable, fallback to local default 
 LAMBDA_ENDPOINT = os.getenv(
     'LAMBDA_ENDPOINT', 'http://localhost:8080/2015-03-31/functions/function/invocations'
 )
 
 # Load the test event (event.json must be available in the working directory)
-with open('event.json', 'rt', encoding='utf-8') as f_in:
+with open('integration-test/event.json', 'rt', encoding='utf-8') as f_in:
     event = json.load(f_in)
 
 # Send the event to the backend and get the response

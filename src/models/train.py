@@ -17,7 +17,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 
 
-def update_env_run_id(run_id, env_path="/app/.env.dev"):
+def update_env_run_id(run_id, env_path="/var/task/.env.dev"):
     """
     Updates the RUN_ID value in the specified .env file.
     If RUN_ID exists, it is replaced. If not, it is appended.
@@ -99,7 +99,7 @@ def train_model(X_train, X_val, y_train, y_val, dv):
         run_id = mlflow.active_run().info.run_id
         print(f"RMSE: {rmse}")
         print(f"Model saved with run_id: {run_id}")
-        update_env_run_id(run_id, env_path="/app/.env.dev")
+        update_env_run_id(run_id, env_path="/var/task/.env.dev")
         return rf, rmse
 
 

@@ -6,6 +6,10 @@
 LOCAL_TAG := $(shell date +"%Y-%m-%d-%H-%M")
 LOCAL_IMAGE_NAME := mlops-capstone:$(LOCAL_TAG)
 
+help:
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z0-9_-]+:' Makefile | grep -v '.PHONY' | cut -d: -f1 | xargs -n1 echo "  -"
+
 # Setup environment (installs dev dependencies and pre-commit hooks)
 setup:
 	@pip install -r requirements-dev.txt
@@ -63,11 +67,14 @@ clean:
 
 # Full workflow: start services, train, test, shutdown, clean LocalStack data
 full-test:
+	@echo "Building Docker images..."
+	docker compose --env-file .env.dev -f docker-compose.local.yaml build
 	@echo "Activating environment and starting services..."
 	docker compose --env-file .env.dev -f docker-compose.local.yaml up -d
 	sleep 5
 	# Ensure S3 bucket and Kinesis stream exist in LocalStack before tests
 	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 s3 mb s3://rll-models-dev --region eu-north-1 || true
+	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 s3 mb s3://mlflow-artifacts --region eu-north-1 || true
 	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_predictions --shard-count 1 --region eu-north-1 || true
 	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_trip_events --shard-count 1 --region eu-north-1 || true
 	@echo "Training model..."
@@ -75,8 +82,7 @@ full-test:
 	@echo "Running unit tests..."
 	docker exec taxi-duration-prediction-backend-1 pytest /var/task/tests/unit | tee unit-test-results.txt
 	@echo "Running integration tests..."
-	# Copy event.json to working directory and run tests
-	docker exec taxi-duration-prediction-backend-1 bash -c "cd /var/task && cp tests/integration/event.json . && pytest tests/integration/" | tee integration-test-results.txt
+	docker exec taxi-duration-prediction-backend-1 bash -c "mkdir -p /var/task/integration-test && cp /var/task/tests/integration/event.json /var/task/integration-test/event.json && pytest tests/integration/" | tee integration-test-results.txt
 	@echo "Shutting down containers..."
 	docker compose --env-file .env.dev -f docker-compose.local.yaml down
 	@echo "Cleaning up LocalStack data directories..."
