@@ -202,7 +202,7 @@ sam deploy --guided
     aws kinesis delete-stream --stream-name prod_taxi_predictions --region eu-north-1 --enforce-consumer-deletion
     aws kinesis delete-stream --stream-name prod_taxi_trip_events --region eu-north-1 --enforce-consumer-deletion
     ```
-  - **Delete S3 buckets and objects:**
+  - **Delete S3 buckets and objects:** 
     ```bash
     aws s3 rm s3://rll-models-prod --recursive --region eu-north-1
     aws s3api delete-bucket --bucket rll-models-prod --region eu-north-1
