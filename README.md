@@ -17,6 +17,8 @@ The project covers:
 - Automated deployment to AWS Lambda (streaming inference)
 - Model monitoring and alerting (automated)
 - Infrastructure as code and CI/CD
+- Workflow orchestration
+- Code quality and reproducibility
 
 ---
 
@@ -62,7 +64,7 @@ taxi-duration-prediction/
 - `terraform/vars/stg.tfvars` — Terraform dev variables
 - `terraform/vars/prod.tfvars` — Terraform prod variables
 - `.github/workflows/cd.yaml` — CI/CD pipeline
-- `sam-env.json` — Local SAM testing
+- `event.json` — Local SAM testing
 
 Switch environments by copying the appropriate file to `.env` and exporting variables:
 ```bash
@@ -102,6 +104,15 @@ Copy `.env.dev-user` or `.env.prod-user` to `.env` and fill in your secrets and 
 
 ---
 
+## LocalStack Training and Testing Workflow (Automated)
+
+1. **Automate and run all tests and code checks**
+    ```bash
+    make full-test
+    ```
+
+---
+
 ## LocalStack Training and Testing Workflow (Manual)
 
 1. **Build Docker images**
@@ -116,9 +127,9 @@ Copy `.env.dev-user` or `.env.prod-user` to `.env` and fill in your secrets and 
 
 3. **Create AWS resources in LocalStack**
     ```bash
-    aws --endpoint-url=http://localhost:4566 s3 mb s3://rll-models-prod --region eu-north-1
-    aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name prod_taxi_predictions --shard-count 1 --region eu-north-1
-    aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name prod_taxi_trip_events --shard-count 1 --region eu-north-1
+    aws --endpoint-url=http://localhost:4566 s3 mb s3://your-dev-bucket --region your-region
+    aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_predictions --shard-count 1 --region your-region
+    aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_trip_events --shard-count 1 --region your-region
     ```
 
 4. **Run training and tests inside the backend container**
@@ -131,12 +142,7 @@ Copy `.env.dev-user` or `.env.prod-user` to `.env` and fill in your secrets and 
     exit
     ```
 
-5. **Automate and run all tests and code checks**
-    ```bash
-    make full-test
-    ```
-
-6. **Shutdown and clean up LocalStack**
+5. **Shutdown and clean up LocalStack**
     ```bash
     docker-compose --env-file .env.dev -f docker-compose.local.yaml down
     docker-compose --env-file .env.dev -f docker-compose.local.yaml down -v
@@ -148,26 +154,46 @@ Copy `.env.dev-user` or `.env.prod-user` to `.env` and fill in your secrets and 
 ## AWS SAM Deployment (Production/Cloud)
 
 > **Warning:**  
-> AWS resources such as Lambda, S3, Kinesis, and ECR may incur charges.  
+> AWS resources such as Lambda, S3, Kinesis, and ECR will incur charges.  
 > Always delete unused resources after testing or deployment to avoid unexpected costs.
 
-### 1. Switch to production environment
+### 1. Configure AWS Credentials
+
+```bash
+aws configure
+```
+
+### 2. Initialize an AWS SAM Project
+
+```bash
+sam init
+```
+
+### 3. Validate and Build the SAM Application
+
+```bash
+sam validate --region your-region
+sam build --region your-region
+```
+
+### 4. Switch to production environment
 
 ```bash
 cp .env.prod-user .env
 export $(grep -v '^#' .env | xargs)
 ```
 
-### 2. Build and push Lambda Docker image
+### 5. Build and push Lambda Docker image
 
 ```bash
 docker build -f terraform/Dockerfile -t taxi-duration-lambda:latest .
-docker tag taxi-duration-lambda:latest 887329216606.dkr.ecr.eu-north-1.amazonaws.com/taxi-duration-lambda:latest
-aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 887329216606.dkr.ecr.eu-north-1.amazonaws.com
-docker push 887329216606.dkr.ecr.eu-north-1.amazonaws.com/taxi-duration-lambda:latest
+docker tag taxi-duration-lambda:latest 123456789012.dkr.ecr.your-region.amazonaws.com/taxi-duration-lambda:latest
+aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin 123456789012.dkr.ecr.your-region.amazonaws.com
+docker push 123456789012.dkr.ecr.your-region.amazonaws.com/taxi-duration-lambda:latest
 ```
+> The `taxi-duration-lambda` image is created during the Docker build step and can be found locally with `docker image ls` or in your ECR repository after pushing.
 
-### 3. Deploy with AWS SAM
+### 6. Deploy with AWS SAM
 
 ```bash
 sam deploy --guided
@@ -175,45 +201,62 @@ sam deploy --guided
 - Follow the prompts to set stack name, region, S3 bucket, and parameters.
 - Confirm that the correct image URI is used for your Lambda function.
 
-### 4. Create and configure AWS resources
+### 7. Create and configure AWS resources
 
 - Ensure your S3 bucket, Kinesis streams, and IAM roles are created and configured as required by your SAM template.
 - You can use the AWS Console or CLI for verification.
 
-### 5. Invoke and test Lambda
+**Example AWS CLI commands:**
+```bash
+# Create S3 bucket
+aws s3 mb s3://your-model-bucket --region your-region
+
+# Create Kinesis stream
+aws kinesis create-stream --stream-name your-predictions-stream --shard-count 1 --region your-region
+
+# Create IAM role (example, use your own trust policy and permissions)
+aws iam create-role --role-name your-lambda-role --assume-role-policy-document file://trust-policy.json
+
+# Attach policy to IAM role
+aws iam attach-role-policy --role-name your-lambda-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+```
+
+- After deployment, verify resources in the AWS Console or with CLI commands like `aws s3 ls`, `aws kinesis list-streams`, and `aws iam list
+
+### 8. Invoke and test Lambda
 
 - Prepare a valid Kinesis event (`event.json`) with base64-encoded data.
 - Invoke your Lambda function:
   ```bash
-  aws lambda invoke --function-name prod_taxi_duration_prediction --payload file://event.json output.json --region eu-north-1
+  aws lambda invoke --function-name prod_taxi_duration_prediction --payload file://event.json output.json --region your-region
   ```
 - Check `output.json` for results.
 - Review CloudWatch logs for errors and debugging.
 
-### 6. Monitor and clean up AWS resources
+### 9. Monitor and clean up AWS resources
 
 - **To avoid charges, delete resources when finished:**
   - **Delete Lambda function:**
     ```bash
-    aws lambda delete-function --function-name prod_taxi_duration_prediction --region eu-north-1
+    aws lambda delete-function --function-name prod_taxi_duration_prediction --region your-region
     ```
   - **Delete Kinesis streams:**
     ```bash
-    aws kinesis delete-stream --stream-name prod_taxi_predictions --region eu-north-1 --enforce-consumer-deletion
-    aws kinesis delete-stream --stream-name prod_taxi_trip_events --region eu-north-1 --enforce-consumer-deletion
+    aws kinesis delete-stream --stream-name prod_taxi_predictions --region your-region --enforce-consumer-deletion
+    aws kinesis delete-stream --stream-name prod_taxi_trip_events --region your-region --enforce-consumer-deletion
     ```
   - **Delete S3 buckets and objects:** 
     ```bash
-    aws s3 rm s3://rll-models-prod --recursive --region eu-north-1
-    aws s3api delete-bucket --bucket rll-models-prod --region eu-north-1
+    aws s3 rm s3://your-dev-bucket --recursive --region your-region
+    aws s3api delete-bucket --bucket your-dev-bucket --region your-region
     ```
   - **Delete ECR repository:**
     ```bash
-    aws ecr delete-repository --repository-name taxi-duration-lambda --region eu-north-1 --force
+    aws ecr delete-repository --repository-name taxi-duration-lambda --region your-region --force
     ```
   - **Delete CloudFormation/SAM stack:**
     ```bash
-    aws cloudformation delete-stack --stack-name <your-stack-name> --region eu-north-1
+    aws cloudformation delete-stack --stack-name <your-stack-name> --region your-region
     ```
 
   - **Optional: Remove unused Docker volumes and networks**
@@ -236,4 +279,4 @@ sam deploy --guided
 
 ---
 
-**For any questions or issues, please open an issue in this repository.** 
+**For any questions or issues, please open an issue in this repository.**
