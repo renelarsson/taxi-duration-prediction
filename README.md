@@ -81,7 +81,7 @@ export $(grep -v '^#' .env | xargs)
 
 ```bash
 git clone https://github.com/renelarsson/taxi-duration-prediction
-cd taxi-duration-prediction
+cd taxi-duration-prediction 
 ```
 
 ### 2. (Optional) Run the setup script
