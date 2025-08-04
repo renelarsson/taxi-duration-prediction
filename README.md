@@ -193,7 +193,7 @@ docker push 123456789012.dkr.ecr.your-region.amazonaws.com/taxi-duration-lambda:
 ```
 > The `taxi-duration-lambda` image is created during the Docker build step and can be found locally with `docker image ls` or in your ECR repository after pushing.
 
-### 6. Deploy with AWS SAM
+### 6. Deploy with AWS SAM 
 
 ```bash
 sam deploy --guided
