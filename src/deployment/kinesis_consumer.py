@@ -26,7 +26,7 @@ KINESIS_ENDPOINT = os.getenv('KINESIS_ENDPOINT_URL', "http://localhost:4566")
 INPUT_STREAM_NAME = os.getenv('INPUT_STREAM_NAME', 'ride-events')
 OUTPUT_STREAM_NAME = os.getenv('OUTPUT_STREAM_NAME', 'ride_predictions')
 MODEL_BUCKET = os.getenv(
-    'MODEL_BUCKET', 'rll-models-dev'
+    'MODEL_BUCKET', 'your-dev-bucket'
 )  # For future model loading if needed
 TEST_RUN = os.getenv('TEST_RUN', 'False') == 'True'
 

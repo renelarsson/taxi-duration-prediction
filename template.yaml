@@ -1,7 +1,7 @@
 # template.yaml - AWS SAM template for taxi duration prediction application
 # Environment separation:
-#   - For development, use .env.dev (MODEL_BUCKET: rll-models-dev)
-#   - For production, use .env.prod (MODEL_BUCKET: rll-models-prod)
+#   - For development, use .env.dev (MODEL_BUCKET: your-dev-bucket)
+#   - For production, use .env.prod (MODEL_BUCKET: your-prod-bucket)
 # MODEL_BUCKET and related values are set via Parameters and environment variables for flexibility.
 
 AWSTemplateFormatVersion: '2010-09-09'
@@ -11,7 +11,7 @@ Parameters:
   ModelBucket:
     Type: String
     Default: your-model-bucket
-    Description: S3 bucket for ML models (use rll-models-dev for dev, rll-models-prod for prod)
+    Description: S3 bucket for ML models (use your-dev-bucket for dev, your-prod-bucket for prod)
   RunId:
     Type: String
     Default: your-run-id

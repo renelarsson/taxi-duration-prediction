@@ -69,7 +69,7 @@ taxi-duration-prediction/
 Switch environments by copying the appropriate file to `.env` and exporting variables:
 ```bash
 cp .env.dev-user .env   # For development/localstack
-cp .env.prod-user .env  # For production/AWS
+cp .env.prod-user .env  # For production/AWS 
 export $(grep -v '^#' .env | xargs)
 ```
 
@@ -80,7 +80,7 @@ export $(grep -v '^#' .env | xargs)
 ### 1. Clone the repository
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/renelarsson/taxi-duration-prediction
 cd taxi-duration-prediction
 ```
 
@@ -105,6 +105,9 @@ Copy `.env.dev-user` or `.env.prod-user` to `.env` and fill in your secrets and 
 ---
 
 ## LocalStack Training and Testing Workflow (Automated)
+
+You can run the manual or automated workflow or see my training and test sessions in the unit-test-results.txt and integration-test-results.txt
+files. Remember to use the Dockerfile.local to build the local backend Docker image for development and testing with LocalStack.
 
 1. **Automate and run all tests and code checks**
     ```bash
@@ -187,9 +190,9 @@ export $(grep -v '^#' .env | xargs)
 
 ```bash
 docker build -f terraform/Dockerfile -t taxi-duration-lambda:latest .
-docker tag taxi-duration-lambda:latest 123456789012.dkr.ecr.your-region.amazonaws.com/taxi-duration-lambda:latest
-aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin 123456789012.dkr.ecr.your-region.amazonaws.com
-docker push 123456789012.dkr.ecr.your-region.amazonaws.com/taxi-duration-lambda:latest
+docker tag taxi-duration-lambda:latest <AWS_ACCOUNT_ID>.dkr.ecr.your-region.amazonaws.com/taxi-duration-lambda:latest
+aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.your-region.amazonaws.com
+docker push <AWS_ACCOUNT_ID>.dkr.ecr.your-region.amazonaws.com/taxi-duration-lambda:latest
 ```
 > The `taxi-duration-lambda` image is created during the Docker build step and can be found locally with `docker image ls` or in your ECR repository after pushing.
 

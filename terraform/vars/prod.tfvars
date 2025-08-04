@@ -1,6 +1,6 @@
 source_stream_name = "prod_taxi_trip_events"
 output_stream_name = "prod_taxi_predictions"
-model_bucket = "rll-models-prod"
+model_bucket = "your-prod-bucket"
 lambda_function_local_path = "../lambda_function.py"
 docker_image_local_path = "../Dockerfile"
 ecr_repo_name = "prod_taxi_duration_predictor"

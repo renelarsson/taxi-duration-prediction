@@ -2,9 +2,9 @@
 terraform {
   required_version = ">= 1.0"
   backend "s3" {
-    # For dev, use: rll-models-dev -> .env.local-me, stg.tfvars, deploy_manual.sh
-    # For prod, use: rll-models-prod -> template.yaml (prod stack), GitHub Actions deploy steps
-    bucket  = "rll-models-dev"
+    # For dev, use: your-dev-bucket -> .env.local-me, stg.tfvars, deploy_manual.sh
+    # For prod, use: your-prod-bucket -> template.yaml (prod stack), GitHub Actions deploy steps
+    bucket  = "your-dev-bucket"
     key     = "mlops-capstone-prod.tfstate"
     region  = "eu-north-1"
     encrypt = true

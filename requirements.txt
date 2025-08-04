@@ -1,4 +1,4 @@
-# terraform/requirements.txt
+# requirements.txt
 # Production dependencies for taxi duration prediction
 
 # Core ML Libraries (from Module 2.2)

@@ -1,7 +1,7 @@
 # terraform/variables.tf
 # Streaming: Taxi Data → Kinesis Input → Lambda (ML Model) → Kinesis Output → Monitoring
-# Environment separation: Use stg.tfvars + .env.dev for development (rll-models-dev )
-#                        Use prod.tfvars + .env.prod for production (rll-models-prod)
+# Environment separation: Use stg.tfvars + .env.dev for development (your-dev-bucket )
+#                        Use prod.tfvars + .env.prod for production (your-prod-bucket)
 
 variable "aws_region" {
   description = "AWS region to create resources"

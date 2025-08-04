@@ -16,11 +16,11 @@ if [ "$USE_LOCALSTACK" = "true" ]; then
 fi
 
 if [ "$ENVIRONMENT" = "prod" ]; then
-    export MODEL_BUCKET_PROD="rll-models-prod"
-    export MODEL_BUCKET_DEV="rll-models-dev"
+    export MODEL_BUCKET_PROD="your-prod-bucket"
+    export MODEL_BUCKET_DEV="your-dev-bucket"
 else
-    export MODEL_BUCKET_PROD="rll-models-dev"
-    export MODEL_BUCKET_DEV="rll-models-dev"
+    export MODEL_BUCKET_PROD="your-dev-bucket"
+    export MODEL_BUCKET_DEV="your-dev-bucket"
 fi
 
 echo "Starting manual deployment for ${ENVIRONMENT} environment"

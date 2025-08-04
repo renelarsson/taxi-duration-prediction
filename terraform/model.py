@@ -14,13 +14,13 @@ import mlflow
 
 
 def get_model_location(run_id):
-    model_bucket = os.getenv('MODEL_BUCKET', 'rll-models-dev')
+    model_bucket = os.getenv('MODEL_BUCKET', 'your-dev-bucket')
     experiment_id = os.getenv('MLFLOW_EXPERIMENT_ID', '1')
     return f's3://{model_bucket}/{experiment_id}/{run_id}/artifacts/model'
 
 
 def get_dict_vectorizer_location(run_id):
-    model_bucket = os.getenv('MODEL_BUCKET', 'rll-models-dev')
+    model_bucket = os.getenv('MODEL_BUCKET', 'your-dev-bucket')
     experiment_id = os.getenv('MLFLOW_EXPERIMENT_ID', '1')
     return f's3://{model_bucket}/{experiment_id}/{run_id}/artifacts/dict_vectorizer.pkl'
 

@@ -1,6 +1,6 @@
 # workflows/inference_pipeline.py
 # Inference pipeline using Prefect.
-# Environment separation: Uses .env.dev for development (rll-models-dev), .env.prod for production (rll-models-prod)
+# Environment separation: Uses .env.dev for development (your-dev-bucket), .env.prod for production (your-prod-bucket)
 # MODEL_BUCKET and OUTPUT_BUCKET are loaded from environment variables for flexibility.
 
 import os
@@ -55,7 +55,7 @@ def get_model_bucket():
     Get the S3 bucket for ML models from environment.
     Uses .env.dev for development, .env.prod for production.
     """
-    return os.getenv('MODEL_BUCKET', 'rll-models-dev')
+    return os.getenv('MODEL_BUCKET', 'your-dev-bucket')
 
 
 def load_model(run_id):

@@ -73,7 +73,7 @@ full-test:
 	docker compose --env-file .env.dev -f docker-compose.local.yaml up -d
 	sleep 5
 	# Ensure S3 bucket and Kinesis stream exist in LocalStack before tests
-	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 s3 mb s3://rll-models-dev --region eu-north-1 || true
+	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 s3 mb s3://your-dev-bucket --region eu-north-1 || true
 	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 s3 mb s3://mlflow-artifacts --region eu-north-1 || true
 	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_predictions --shard-count 1 --region eu-north-1 || true
 	export $$(grep -v '^#' .env | xargs) && aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name stg_taxi_trip_events --shard-count 1 --region eu-north-1 || true

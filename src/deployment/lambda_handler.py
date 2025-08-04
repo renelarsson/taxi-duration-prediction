@@ -1,6 +1,6 @@
 # src/deployment/lambda_handler.py
 # Lambda handler for deployment - organized structure version.
-# Environment separation: Uses .env.dev for development (rll-models-dev), .env.prod for production (rll-models-prod)
+# Environment separation: Uses .env.dev for development (your-dev-bucket), .env.prod for production (your-prod-bucket)
 # MODEL_BUCKET and related values are loaded from environment variables for flexibility.
 
 import os
@@ -33,7 +33,7 @@ class LambdaHandler:
         )
         self.run_id = os.getenv('RUN_ID')
         self.test_run = os.getenv('TEST_RUN', 'False') == 'True'
-        self.model_bucket = os.getenv('MODEL_BUCKET', 'rll-models-dev')
+        self.model_bucket = os.getenv('MODEL_BUCKET', 'your-dev-bucket')
 
         self.kinesis_client = boto3.client(
             'kinesis', endpoint_url=os.getenv('KINESIS_ENDPOINT_URL')
@@ -209,6 +209,6 @@ if __name__ == "__main__":
         ]
     }
     os.environ['TEST_RUN'] = 'True'
-    os.environ['MODEL_BUCKET'] = 'rll-models-dev'
-    os.environ['RUN_ID'] = 'a986756f70a240cf8808a59ed77ba2d3'
+    os.environ['MODEL_BUCKET'] = 'your-dev-bucket'
+    os.environ['RUN_ID'] = 'your-run-id'
     result = lambda_handler(test_event, None)

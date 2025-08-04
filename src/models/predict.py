@@ -1,6 +1,6 @@
 # src/models/predict.py
 # Model prediction utilities for taxi duration prediction.
-# Environment separation: Uses .env.dev for development (rll-models-dev), .env.prod for production (rll-models-prod)
+# Environment separation: Uses .env.dev for development (your-dev-bucket), .env.prod for production (your-prod-bucket)
 # All bucket, stream, and run_id values are loaded from environment variables for flexibility.
 
 import os
@@ -23,7 +23,7 @@ def get_model_bucket():
     Get the S3 bucket for ML models from environment.
     Uses .env.dev for development, .env.prod for production.
     """
-    return os.getenv('MODEL_BUCKET', 'rll-models-dev')
+    return os.getenv('MODEL_BUCKET', 'your-dev-bucket')
 
 
 def get_run_id():
@@ -210,9 +210,9 @@ def validate_data(df: pd.DataFrame):
 if __name__ == "__main__":
     # Set environment for local test (do not use in production)
     os.environ['MODEL_BUCKET'] = (
-        'rll-models-dev'  # Change to rll-models-prod for prod test
+        'your-dev-bucket'  # Change to your-prod-bucket for prod test
     )
-    os.environ['RUN_ID'] = 'a986756f70a240cf8808a59ed77ba2d3'
+    os.environ['RUN_ID'] = 'your-run-id'
 
     # Example: batch prediction
     input_file = 'data/test_trips.parquet'
