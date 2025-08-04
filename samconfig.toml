@@ -1,12 +1,12 @@
 version = 0.1
 
 [default.deploy.parameters]
-stack_name = "y"
+stack_name = "stack"
 resolve_s3 = true
-s3_prefix = "y"
+s3_prefix = "stack"
 region = "eu-north-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
-parameter_overrides = "ModelBucket=\"rll-models-prod\" RunId=\"a986756f70a240cf8808a59ed77ba2d3\" PredictionsStreamName=\"prod_taxi_predictions\""
+parameter_overrides = "ModelBucket=\"rll-models-prod\" RunId=\"ce43cbc33af545969538f96b868e88b6\" PredictionsStreamName=\"prod_taxi_predictions\""
 image_repositories = []

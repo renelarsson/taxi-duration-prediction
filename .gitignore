@@ -27,6 +27,7 @@ venv/
 .env
 .env.prod
 .env.dev
+.env.dev.backup
 
 # IDE and OS files
 .vscode/

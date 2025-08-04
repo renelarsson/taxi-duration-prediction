@@ -10,7 +10,7 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   ModelBucket:
     Type: String
-    Default: rll-models-dev
+    Default: your-model-bucket
     Description: S3 bucket for ML models (use rll-models-dev for dev, rll-models-prod for prod)
   RunId:
     Type: String
@@ -26,11 +26,17 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      ImageUri: 887329216606.dkr.ecr.eu-north-1.amazonaws.com/taxi-duration-lambda:v2
-      Timeout: 30
-      MemorySize: 256 # Changed from 128 to 256 for better performance
+      ImageUri: <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/taxi-duration-lambda:latest
+      Timeout: 10
+      MemorySize: 128 # Change for better performance
       Environment:
         Variables:
           MODEL_BUCKET: !Ref ModelBucket
           RUN_ID: !Ref RunId
           PREDICTIONS_STREAM_NAME: !Ref PredictionsStreamName
+      Events:
+        KinesisTrigger:
+          Type: Kinesis
+          Properties:
+            Stream: !Sub "arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${PredictionsStreamName}"
+            StartingPosition: LATEST

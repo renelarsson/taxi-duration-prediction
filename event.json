@@ -12,9 +12,9 @@
          "eventVersion": "1.0",
          "eventID": "shardId-000000000000:49630081666084879290581185630324770398608704880802529282",
          "eventName": "aws:kinesis:record",
-         "invokeIdentityArn": "arn:aws:iam::887329216606:role/lambda-kinesis-role",
-         "awsRegion": "eu-north-1",
-         "eventSourceARN": "arn:aws:kinesis:eu-north-1:887329216606:stream/prod_taxi_predictions"
+         "invokeIdentityArn": "arn:aws:iam::<your-account-id>:role/lambda-kinesis-role",
+         "awsRegion": "<your-region>",
+         "eventSourceARN": "arn:aws:kinesis:<your-region>:<your-account-id>:stream/prod_taxi_predictions"
       }
    ]
 }

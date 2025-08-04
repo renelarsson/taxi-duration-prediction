@@ -11,21 +11,26 @@ import logging
 
 import terraform.model as model
 
-
-def get_run_id(env_path="/var/task/.env.dev"):
+def get_run_id(env_path=None):
     """
     Reads RUN_ID and TEST_RUN from the environment file.
+    Uses ENV_PATH environment variable for flexibility.
+    Defaults to '/var/task/.env.prod' if not set.
     """
+    if env_path is None:
+        env_path = os.getenv("ENV_PATH", "/var/task/.env.prod")
     run_id = None
     test_run = "False"
-    with open(env_path) as f:
-        for line in f:
-            if line.startswith("TEST_RUN="):
-                test_run = line.strip().split("=", 1)[1]
-            if line.startswith("RUN_ID="):
-                run_id = line.strip().split("=", 1)[1]
+    try:
+        with open(env_path) as f:
+            for line in f:
+                if line.startswith("TEST_RUN="):
+                    test_run = line.strip().split("=", 1)[1]
+                if line.startswith("RUN_ID="):
+                    run_id = line.strip().split("=", 1)[1]
+    except FileNotFoundError:
+        logging.error(f"Environment file not found: {env_path}")
     return run_id, test_run == "True"
-
 
 RUN_ID, TEST_RUN = get_run_id()
 
@@ -38,7 +43,6 @@ print("DEBUG TEST_RUN:", TEST_RUN)
 
 # Initialize model service (mock for tests, real for deployment)
 if TEST_RUN:
-
     class MockModel:
         def predict(self, X):
             return [21.3] * len(X)
@@ -57,7 +61,6 @@ else:
         test_run=TEST_RUN,
     )
 
-
 def lambda_handler(event, context):
     """
     Lambda handler for Kinesis streaming events.
@@ -65,9 +68,11 @@ def lambda_handler(event, context):
     - Local: returns {"statusCode": 200, "predictions": [...]}
     - Deployment: returns {"statusCode": 200, "body": [...]}
     """
-    print("EVENT RECEIVED:", event)
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Lambda triggered. Event: %s", event)
+    print("Lambda triggered. Event:", event)
+
     try:
-        logging.info("Received event: %s", event)
         predictions = []
         for record in event.get("Records", []):
             encoded_data = record["kinesis"]["data"]

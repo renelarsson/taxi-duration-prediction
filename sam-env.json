@@ -1,7 +1,0 @@
-{
-    "RideDurationPredictionFunction": {
-        "MODEL_BUCKET": "rll-models-dev",
-        "RUN_ID": "a986756f70a240cf8808a59ed77ba2d3",
-        "PREDICTIONS_STREAM_NAME": "stg_taxi_predictions"
-    }
-}
